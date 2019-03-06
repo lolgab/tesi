@@ -33,14 +33,18 @@ Dal punto di vista matematico il PageRank di una pagina è definito in modo rico
 \subsection{Storia}
 Larry Page e Sergey Brin, i due co-fondatori di Google, svilupparono l'algoritmo PageRank nel 1996 come parte di un progetto di ricerca dell'università di Standford riguardo un nuovo tipo di motore di ricerca. Fu proprio di Sergey Brin l'idea che il World Wide Web dovesse essere ordinato per popolarità data dai link: più una pagina esiste come link nelle altre pagine, più questa deve avere un punteggio alto in classifica.
 
-
-
 \section{Basi di dati a grafo}
 Per l'elaborazione dei dati relativi alle varie relazioni tra autori e articoli accademici, si è visto naturale l'utilizzo di una base di dati a grafo. \\
-Questo particolare tipo di base di dati offre le ottimizzazioni necessarie a rappresentare un enorme numero di relazioni tra entità, in modo dinamico, senza dover racchiudere lo schema in convenzionali tabelle. Offre, altresì, convenienti operazioni e algoritmi pre-implementati per l'analisi e l'elaborazione dei grafi.
+Questo particolare tipo di base di dati offre le ottimizzazioni necessarie a rappresentare un enorme numero di relazioni tra entità, in modo dinamico, senza dover racchiudere lo schema in convenzionali tabelle. Offre, altresì, convenienti operazioni e algoritmi pre-implementati per l'analisi e l'elaborazione dei grafi, tra i quali risulta presente anche il PageRank.
 \par
-La principale caratteristica che differenzia le basi di dati di grafi rispetto alle classiche basi di dati relazionali è che le operazioni di join, mentre nel modello relazionale sono svolte a tempo di interrogazione, facendo il matching delle chiavi primarie e delle chiavi esterne di tutte le righe della nelle tabelle interrogate, operazione tra l'altro pesante sia dal punto di vista computazionale che dell'utilizzo di memoria, sono ottimizzate conservando le relazioni all'interno dei nodi stessi. Viene sacrificata, così, la dimensione su disco del database, a vantaggio di una ridotta complessità delle operazioni di join.
-\section{Il Graph DBMS Neo4J}
+La principale caratteristica che differenzia le basi di dati di grafi rispetto alle classiche basi di dati relazionali è che le operazioni di join, mentre nel modello relazionale sono svolte a tempo di interrogazione, facendo il matching delle chiavi primarie e delle chiavi esterne di tutte le righe della nelle tabelle interrogate, operazione tra l'altro pesante sia dal punto di vista computazionale che dell'utilizzo di memoria, sono ottimizzate conservando le relazioni all'interno dei nodi stessi. Viene incrementata, così, la dimensione su disco del database, a vantaggio di una ridotta complessità delle operazioni di join.
+Le basi di dati di grafi ricadono nella categoria delle basi di dati NoSQL, ovvero nella categoria delle basi di dati create con l'intento di superare i limiti delle tradizionali basi di dati relazionali. Mentre condividono con gli altri database NoSQL l'idea che non debba essere necessario definire staticamente il modello della base di dati in modo preventivo al suo utilizzo, differiscono per quanto riguarda la strategia di memorizzazione dei dati.
+\par
+Il classico linguaggio SQL, sebbene abbia potenza sufficiente a rappresentare la maggior parte delle interrogazioni sui grafi, non essendo stato pensato per tale utilizzo, risulta in interrogazioni eccessivamente complicate e prone ad errori. Per ovviare alle difficoltà di utilizzo di SQL nel dominio dei grafi i graph database sono dotate di linguaggi di interrogazione specializzati per rappresentare i nodi e gli archi dei grafi.
+
+\subsection{I principali Graph DBMS}
+
+\subsection{Il Graph DBMS Neo4J}
 Tra le opzioni presenti, la scelta è ricaduta su Neo4J, il dbms di grafi più diffuso sulla piattaforma Java. Esso possiede due diverse distribuzioni: neo4j-community e neo4j-enterprise. La distribuzione enterprise è pensata per l'utilizzo in cloud, offrendo soluzioni con un maggiore parallelismo per l'esecuzione degli algoritmi, la possibilità di eseguire algoritmi su cluster, e, a dire degli autori, un runtime per l'esecuzione delle query in linguaggio Cypher del 70\% più veloce. \\
 Non essendoci la necessità di esecuzione in cloud si è scelto di utilizzare la distribuzione community. \\
 Neo4J introduce un suo linguaggio di querying per l'interazione dell'utente con il database. Tale linguaggio nasce con l'obiettivo di essere facilmente leggibile e comprensibile dagli utenti, fornendo, allo stesso tempo, le features necessarie a gestire convenientemente i grafi, a differenza del classico linguaggio SQL.
