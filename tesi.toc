@@ -1,7 +1,0 @@
-\babel@toc {italian}{}
-\babel@toc {italian}{}
-\contentsline {section}{\numberline {1}L'algoritmo PageRank}{3}% 
-\contentsline {subsection}{\numberline {1.1}Storia}{4}% 
-\contentsline {section}{\numberline {2}Basi di dati a grafo}{5}% 
-\contentsline {subsection}{\numberline {2.1}I principali Graph DBMS}{6}% 
-\contentsline {subsection}{\numberline {2.2}Il Graph DBMS Neo4J}{6}% 
