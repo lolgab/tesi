@@ -3,6 +3,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage{graphicx} %per aggiungere le immagini
 \usepackage{listings} %per aggiungere codice sorgente
+\usepackage{tabularx}
 
 % interruzione di pagina tra le section
 \let\oldsection\section
@@ -22,6 +23,80 @@
 \tableofcontents
 \clearpage
 
+\section{Introduzione}
+
+\section{Motivazioni}
+
+\subsection{Formato dei dati}
+Per poter effettuare lo studio era necessario lavorare su dati reali. Una stima della qualità degli autori di testi accademici con la pretesa di essere più efficace a stimare la effettiva rilevanza, deve essere valorata da dati reali, possibilmente in numero sufficiente affinché siano considerabili statisticamente rilevanti.
+\par
+In un primo momento si è pensato di utilizzare, come fonte da cui ricavare i dati, un servizio on-line di consultazione degli articoli come Scopus. \\ 
+La maniera di ottenere i dati sarebbe dovuta essere incrementale.
+Per incrementale si intende il non costuire l'intero dataset a priori dell'analisi dei nodi del grafo, bensì costruire il sotto-grafo "centrato" rispetto ad un autore.
+Quindi, scegliendo un autore, si analizzano i suoi articoli, le referenze di tali articoli, ed infine dagli autori delle referenze è possibile stabilire un collegamento tra i due autori. \\
+L'approccio descritto possiede almeno due aspetti negativi non trascurabili,
+La procedura ha una complessità elevata e richiede una ripetutamente l'interrogazione di un servizio online, quale Scopus, che vieta espressamente le pratiche di Data Mining attraverso l'utilizzo delle loro API. \\
+Dunque si è cercata una strada differente che permettesse di analizzare localmente una grande quantità di dati.
+\par
+Come scelta definitiva si è utilizzato un dataset ospitato dal sito aminer.org. Tale sito si prefige l'obiettivo di riunire i dati di quanti più articoli possibili, relativamente a pubblicazioni del macro-ambito della computer science. \\
+aminer.org aggiorna ogni anno il suo dataset, rilasciandone una nuova versione. Nella versione 10 (la versione di cui si fa riferimento in questo lavoro) possiede un numero di poco superiore ai 3 milioni di articoli. \\
+\begin{figure}[h!]
+  \includegraphics[width=\linewidth]{images/aminer.jpg}
+  \caption{Il sito web dell'organizzazione aminer.org}
+\end{figure}
+
+Il dataset presenta i dati nel formato JSON. Contiene un diverso oggetto JSON per ogni articolo. Gli oggetti sono disposti nel file suddivisi per riga.
+Per ogni articolo sono presenti i seguenti campi: \\
+\begin{tabularx}{\textwidth}{| X | X | X | X |}
+\hline \textbf{Nome Campo} & \textbf{Tipo Campo} & \textbf{Descrizione} & \textbf{Esempio} \\
+\hline id & stringa & id della pubblicazione & ``013ea675-bb58-42f8-a423-f5534546b2b1''\\
+\hline title & stringa & titolo della pubblicazione & ``Dynamic analysis of a pest-epidemic model with impulsive control'' \\
+\hline authors & lista di stringhe & autori della pubblicazione & [``Leon A. Sakkal'', ``Kyle Z. Rajkowski'', ``Roger S. Armen'']\\
+\hline venue & stringa & sede di pubblicazione & ``Neural Networks'' \\
+\hline year & intero & anno di pubblicazione & 1994 \\
+\hline n\_citation & intero & sede di pubblicazione & 24 \\
+\hline references & stringa & lista delle citazioni & [``013ea675-bb58-42f8-a423-f5534546b2b1'', ``c043e258-256f-4957-8ac5-899905eb4efd'']\\
+\hline abstract & stringa & sommario & ``In this work we propose schemes for joint modelorder and step-size adaptation of reduced-rank adaptive filters \ldots''\\
+\hline
+\end{tabularx}
+
+Di seguito si mostra un esempio di oggetto JSON del dataset rappresentante un articolo:
+\begin{lstlisting}[keepspaces=true]
+{
+  "authors": [
+    "Leon A. Sakkal",
+    "Kyle Z. Rajkowski",
+    "Roger S. Armen"
+  ],
+  "n_citation": 0,
+  "references": [
+    "4f4f200c-0764-4fef-9718-b8bccf303dba",
+    "aa699fbf-fabe-40e4-bd68-46eaf333f7b1"
+  ],
+  "title":
+      "Prediction of consensus binding mode geometries
+      for related chemical series of positive allosteric
+      modulators of adenosine and muscarinic acetylcholine
+      receptors",
+  "venue": "Journal of Computational Chemistry",
+  "year": 2017,
+  "id": "013ea675-bb58-42f8-a423-f5534546b2b1"
+}
+\end{lstlisting}
+\subsection{Il preprocessing dei dati}
+Il formato JSON, sebbene pratico ed efficace per lo sviluppo, ad esempio, di API di servizi online e per la memorizzazione di dati senza una precisa strutturizzazione, non si presta ad elaborazione di grandi quantità di dati. Questo per almeno due motivi:
+\begin{enumerate}  
+  \item Spreca molti dati per la memorizzazione dei caratteri di controllo (inizio/fine di un oggetto o di una lista, virgolette di apertura/chiusura delle stringhe). Inoltre aggiunge le stringhe contenenti i nomi dei campi per ogni oggetto anche se gli oggetti si riferiscono ad uno stesso schema.
+  \item L'interpretazione di un oggetto non è un'operazione banale come può essere quella di distinguere i campi di un file csv (comma separated values). La struttura ricorsiva del JSON richiede della computazione che per dataset di dimensione di diversi Gigabyte può diventare un overhead rilevante.
+\end{enumerate}
+
+Per ovviare a tali problemi si è deciso di agire con un primo preprocessing. Si sono filtrati i soli dati rilevanti agli scopi del lavoro in oggetto. In particolare, per ogni articolo, si sono mantenute le sole informazioni dell'id dell'articolo, la lista degli autori e la lista delle referenze. Si è sostituito, inoltre, il dispendioso formato JSON con un formato CSV leggermente modificato per poter distinguere le liste degli autori e delle referenze.
+\par
+Il formato scelto per la memorizzazione si presenta così:
+\begin{lstlisting}[keepspaces=true]
+id_articolo,ref_1;ref_2,autore_1;autore_2;autore_2
+\end{lstlisting}
+Abbiamo memorizzato un articolo per ogni riga. In questo modo è possibile utilizzare il fine-linea per distinguere gli articoli tra loro
 \section{L'algoritmo PageRank}
 PageRank è un algoritmo introdotto da Google per classificare le pagine web. 
 Nasce dalla necessità del motore di ricerca di avere un ordinamento delle pagine web rispetto alla loro importanza. Esso funziona contando il numero di link delle pagine web per avere una stima approssimativa della qualità e dell'importanza di un sito web. L'assunzione su cui questo si basa è quella che, tantopiù una pagina è importante, più tende a ricevere collegamenti dalle altre pagine.
