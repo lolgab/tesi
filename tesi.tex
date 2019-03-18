@@ -4,6 +4,9 @@
 \usepackage{graphicx} %per aggiungere le immagini
 \usepackage{listings} %per aggiungere codice sorgente
 \usepackage{tabularx}
+\usepackage{amsmath}
+
+\lstset{basicstyle=\ttfamily\footnotesize,breaklines=true}
 
 % interruzione di pagina tra le section
 \let\oldsection\section
@@ -26,6 +29,8 @@
 \section{Introduzione}
 
 \section{Motivazioni}
+
+
 
 \subsection{Formato dei dati}
 Per poter effettuare lo studio era necessario lavorare su dati reali. Una stima della qualità degli autori di testi accademici con la pretesa di essere più efficace a stimare la effettiva rilevanza, deve essere valorata da dati reali, possibilmente in numero sufficiente affinché siano considerabili statisticamente rilevanti.
@@ -96,19 +101,16 @@ Il formato scelto per la memorizzazione si presenta così:
 \begin{lstlisting}[keepspaces=true]
 id_articolo,ref_1;ref_2,autore_1;autore_2;autore_2
 \end{lstlisting}
-Abbiamo memorizzato un articolo per ogni riga. In questo modo è possibile utilizzare il fine-linea per distinguere gli articoli tra loro
-\section{L'algoritmo PageRank}
-PageRank è un algoritmo introdotto da Google per classificare le pagine web. 
-Nasce dalla necessità del motore di ricerca di avere un ordinamento delle pagine web rispetto alla loro importanza. Esso funziona contando il numero di link delle pagine web per avere una stima approssimativa della qualità e dell'importanza di un sito web. L'assunzione su cui questo si basa è quella che, tantopiù una pagina è importante, più tende a ricevere collegamenti dalle altre pagine.
-\begin{figure}[h!]
-  \includegraphics[width=\linewidth]{images/pagerank.jpg}
-  \caption{Rappresentazione grafica del ranking con PageRank}
-\end{figure}
-Dal punto di vista matematico il PageRank di una pagina è definito in modo ricorsivo e dipende dal numero e dalla metrica PageRank di tutte le pagine che la collegano (archi entranti). Una pagina a cui sono collegate molte pagine con un PageRank elevato riceve un livello elevato.
-\subsection{Storia}
-Larry Page e Sergey Brin, i due co-fondatori di Google, svilupparono l'algoritmo PageRank nel 1996 come parte di un progetto di ricerca dell'università di Standford riguardo un nuovo tipo di motore di ricerca. Fu proprio di Sergey Brin l'idea che il World Wide Web dovesse essere ordinato per popolarità data dai link: più una pagina esiste come link nelle altre pagine, più questa deve avere un punteggio alto in classifica.
+Si è memorizzato un articolo per ogni riga. In questo modo è possibile utilizzare il carattere fine-linea per distinguere gli articoli tra loro.
+Separando le stringhe utilizzando come separatore la virgola si ottengono dunque tre stringhe contenenti:
+\begin{itemize}
+  \item l'id
+  \item la lista degli id delle referenze
+  \item la lista dei nomi degli autori
+\end{itemize}
+Le due liste suddette si possono ora separare utilizzando come separatore il punto e virgola, ottenendo infine 
 
-\section{Basi di dati a grafo}
+\subsection{Basi di dati a grafo}
 Per l'elaborazione dei dati relativi alle varie relazioni tra autori e articoli accademici, si è visto naturale l'utilizzo di una base di dati a grafo. \\
 Questo particolare tipo di base di dati offre le ottimizzazioni necessarie a rappresentare un enorme numero di relazioni tra entità, in modo dinamico, senza dover racchiudere lo schema in convenzionali tabelle. Offre, altresì, convenienti operazioni e algoritmi pre-implementati per l'analisi e l'elaborazione dei grafi, tra i quali risulta presente anche il PageRank.
 \par
@@ -117,9 +119,9 @@ Le basi di dati di grafi ricadono nella categoria delle basi di dati NoSQL, ovve
 \par
 Il classico linguaggio SQL, sebbene abbia potenza sufficiente a rappresentare la maggior parte delle interrogazioni sui grafi, non essendo stato pensato per tale utilizzo, risulta in interrogazioni eccessivamente complicate e prone ad errori. Per ovviare alle difficoltà di utilizzo di SQL nel dominio dei grafi i graph database sono dotate di linguaggi di interrogazione specializzati per rappresentare i nodi e gli archi dei grafi.
 
-\subsection{I principali Graph DBMS}
+\subsubsection{I principali Graph DBMS}
 
-\subsection{Il Graph DBMS Neo4J}
+\subsubsection{Il Graph DBMS Neo4J}
 Tra le opzioni presenti, la scelta è ricaduta su Neo4J, il dbms di grafi più diffuso sulla piattaforma Java. Esso possiede due diverse distribuzioni: neo4j-community e neo4j-enterprise. La distribuzione enterprise è pensata per l'utilizzo in cloud, offrendo soluzioni con un maggiore parallelismo per l'esecuzione degli algoritmi, la possibilità di eseguire algoritmi su cluster, e, a dire degli autori, un runtime per l'esecuzione delle query in linguaggio Cypher del 70\% più veloce. \\
 Non essendoci la necessità di esecuzione in cloud si è scelto di utilizzare la distribuzione community. \\
 Neo4J introduce un suo linguaggio di querying per l'interazione dell'utente con il database. Tale linguaggio nasce con l'obiettivo di essere facilmente leggibile e comprensibile dagli utenti, fornendo, allo stesso tempo, le features necessarie a gestire convenientemente i grafi, a differenza del classico linguaggio SQL.
@@ -166,4 +168,130 @@ Per questo scopo esiste una seconda parola chiave del linguaggio Cypher che equi
 \end{lstlisting}
 Eseguendo questa query ripetutamente è possibile incrementare il contatore "times" associato all'arco. E' questo il caso, ad esempio dell'importazione batch di nodi e archi del grafo. \\
 
+
+\section{L'algoritmo PageRank}
+PageRank è un algoritmo introdotto da Google per classificare le pagine web. 
+Nasce dalla necessità del motore di ricerca di avere un ordinamento delle pagine web rispetto alla loro importanza. Esso funziona contando il numero di link delle pagine web per avere una stima approssimativa della qualità e dell'importanza di un sito web. L'assunzione su cui questo si basa è quella che, tantopiù una pagina è importante, più tende a ricevere collegamenti dalle altre pagine.
+\begin{figure}[h!]
+  \includegraphics[width=\linewidth]{images/pagerank.jpg}
+  \caption{Rappresentazione grafica del ranking con PageRank}
+\end{figure}
+Dal punto di vista matematico il PageRank di una pagina è definito in modo ricorsivo e dipende dal numero e dalla metrica PageRank di tutte le pagine che la collegano (archi entranti). Una pagina a cui sono collegate molte pagine con un PageRank elevato riceve un livello elevato.
+\subsection{Storia}
+Larry Page e Sergey Brin, i due co-fondatori di Google, svilupparono l'algoritmo PageRank nel 1996 come parte di un progetto di ricerca dell'università di Standford riguardo un nuovo tipo di motore di ricerca. Fu proprio di Sergey Brin l'idea che il World Wide Web dovesse essere ordinato per popolarità data dai link: più una pagina esiste come link nelle altre pagine, più questa deve avere un punteggio alto in classifica.
+
+\subsection{Formulazione}
+Sia $ V = \{ 1, 2, 3, \ldots \} $ un insieme di nodi.
+
+\subsection{Tecnica}
+Si propone di seguito la tecnica proposta il calcolo dello score per la classificazione degli autori. \\
+La tecnica consiste nel calcolo del PageRank dei nodi utilizzando, come pesi degli archi, il numero di citazioni prima e lo stesso numero di citazioni moltiplicato per un coefficiente peggiorativo. Una volta ottenuti questi due punteggi, la loro combinazione attraverso una funzione permette di ottenere il risultato finale.
+\par
+Il procedimento illustrato si compone dei seguenti passi:
+\begin{lstlisting}[keepspaces=true]
+  1)  Definizione della matrice dei pesi p(i, j)
+  
+  2)  Per ogni nodo i:
+        Calcolo del pagerank P(i) con pesi p 
+
+  3)  Calcolo della nuova matrice dei pesi 
+      pmod(i, j) = p(i, j) * (1 - c(i, j))
+      
+  4)  Per ogni nodo i:
+        Calcolo del pagerank Pmod(i) con pesi pmod
+        
+  5)  Per ogni nodo i:
+        Calcolo dello score s(i) = log(Pmod(i)) - log(P(i))
+\end{lstlisting}
+
+
+\begin{enumerate}
+  \item 
+  Al primo passo della metodologia si calcola la matrice dei pesi del PageRank. \\
+  Per ogni coppia di nodi $ (i, j) $, $ p_{ij} $ sarà uguale al numero di citazioni del nodo $ i $ ad articoli scritti dal nodo $ j $. 
+  \item
+  Si calcola poi il PageRank: 
+  \[
+  P_k(i) = 
+    \begin{cases} 
+      \displaystyle \frac{1}{n} & k = 1 \\
+      \displaystyle \frac
+        {\displaystyle \sum_{j=1}^{n} p_{ji}}
+        {\displaystyle \sum_{t=1}^{n} {\sum_{j=1}^{n} p_{jt}}}
+        P_{k-1}(j) & k > 1 
+
+    \end{cases} 
+  \]
+  dove $ k $ è il numero di iterazioni necessarie alla convergenza dell'algoritmo. L'algoritmo, basato sul metodo delle potenze (\textit{power iteration}), parte da un'approssimazione iniziale, in cui è assegnata probabilità eguale a tutti i nodi. Ad ogni iterazione aggiorna le probabilità calcolando un'approssimazione più accurata rispetto a quella dell'iterazione precedente.
+  \par
+  Il criterio di arresto classico dell'algoritmo consiste nella stima del miglioramento della soluzione tra l'iterazione $k$-esima e l'iterazione $k-1$-esima; ovvero nella valutazione della norma 1 tra il vettore dei PageRank all'iterazione $k$-esima e quello all'iterazione precedente:
+  \[
+    \Delta^{(k)} = \Arrowvert P^{(k)} - P^{(k+1)}\Arrowvert
+  \]
+  Quando tale valore risulta essere sotto una certa soglia, si può considerare l'algoritmo giunto a convergenza.
+  \par
+  All'atto pratico spesso si preferisce stabilire a priori il numero di iterazioni che l'algoritmo dovrà svolgere. Questa è la scelta fatta da Neo4J e Apache Spark all'atto di implementare l'algoritmo di PageRank.
+  \item
+  Si passa poi a calcolare la nuova matrice di pesi per il calcolo del PageRank modificato. L'obiettivo è limitare la modifica dell'algoritmo alla sola matrice dei pesi, in modo da lasciare inalterato l'algoritmo.
+  \par
+  In questo caso il peso dell'arco da un generico nodo $i$ ad un generico nodo $j$ è calcolato tenendo conto, oltre che del numero di citazioni del nodo $i$ ad articoli scritti dal nodo $j$, dell'indice di collaborazione tra i due autori e del numero di citazioni considerando il verso opposto, ovvero le citazioni del nodo $j$ ad articoli scritti dal nodo $i$. \\
+  Questi parametri non sono considerati in senso assoluto. Bensì vengono considerati rapportati alle relazioni che il nodo citato ha con altri autori.
+  Il generico peso è definito come segue:
+  \[
+    p_{ij} = 
+    \left( 
+      \frac
+      {\displaystyle cit_{ji}}
+      {\displaystyle \sum_{t=1}^{n} {cit_{jt}}}
+    \right)
+    \bullet
+    \left(
+      1 - 
+      \left(
+      \alpha_1
+      \frac
+      {\displaystyle cit_{ij}}
+      {\displaystyle \sum_{s=1}^{n} {cit_{is}}}
+      +
+      \alpha_2
+      \frac
+      {\displaystyle coa_{ij}}
+      {\displaystyle \sum_{s=1}^{n} {coa_{is}}}
+      \right)
+    \right)
+  \]
+  
+  Nella formula sopra riportata si può notare come si effettuino due diverse normalizzazioni per la parte classica del peso $p_{ij}$ e per la parte che tiene conto dell'indice di collaborazione. Il numero di citazioni dell'arco entrante
+\end{enumerate}
+
+\section{L'implementazione}
+Per l'implementazione finale è stata fatta la scelta di utilizzare un implementazione custom dell'algoritmo PageRank e dei suoi derivati. \\
+Tale scelta è stata dettata dal fatto che il livello di prestazioni ottenibili utilizzando le basi di dati a grafo non erano ragionevoli per eseguire il lavoro sulla mole di dati a disposizione.
+\subsection{Il linguaggio Scala}
+L'implementazione è stata svolta nel linguaggio di programmazione Scala. \\
+Il linguaggio Scala, linguaggio staticamente tipato basato sulla Java Virtual Machine, offre, oltre ad una sintassi espressiva e conveniente, strutture dati che rendono semplice il calcolo parallelo; calcolo parallelo molto utile per ridurre notevolmente i tempi di calcolo nelle macchine multicore.
+\subsection{La generazione del grafo}
+Per la generazione del grafo a partire dalla versione filtrata e compattata del dataset si è utilizzato un metodo multi-fase.
+\begin{enumerate}
+  \item In primo luogo è stato necessario ottenere gli autori distinti e ordinati. L'ordinamento è necessario per l'utilizzo dell'algoritmo di ricerca binaria. Per ottenere gli autori distinti e ordinati si è, in un primo momento, utilizzata una struttura dati TreeSet, struttura dati che naturalmente mantiene l'ordinamento degli oggetti. Una volta inserite le stringhe contenenti i nomi degli autori nel TreeSet è sufficiente convertire l'insieme in un array per risolvere il problema. In un secondo momento si è optato per una soluzione più efficiente. Costruendo prima un ArrayBuilder (struttura dati che mantiene un array dinamicamente crescente per la costruzione degli array), calcolando i distinti (operazione che dietro le quinte costruisce un HashSet mutabile e lo riempie) ed infine applicando l'algoritmo quickSort per ordinare l'array. Questa ottimizzazione ottiene un miglioramento delle performance di quasi un ordine di grandezza.
+  \begin{lstlisting}[keepspaces=true]
+def authorsArray(file: Array[Line], numLines: Int):
+    Array[String] = {
+  def builder(): mutable.ArrayBuilder[String] = {
+    val res = mutable.ArrayBuilder.make[String]()
+      cfor(0)(_ < numLines, _ + 1) { i =>
+        val line = file(i)
+        for (author <- line.authors) {
+          res += author
+        }
+      }
+    res
+  }
+  val authors = builder().result.distinct
+  util.Sorting.quickSort(authors)
+  authors
+}    
+  \end{lstlisting}
+  \item Una volta ottenuti gli autori distinti il passo successivo è stato quello di 
+\end{enumerate}
 \end{document}

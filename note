@@ -1,0 +1,3 @@
+rimuovere le autocitazioni e fare i grafici in tutti e due i modi.
+fare l'istogramma per contare per quanti autori il conteggio è diverso.
+fare il l'istogramma cumulativo del valore assoluto della differenza. dovrebbe crescere subito e poi schiacciarsi ad uno, perché i due pagerank sono simili, quindi per la maggior parte degli autori si comportano in modo uguale.

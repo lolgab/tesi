@@ -1,7 +1,16 @@
 \babel@toc {italian}{}
 \babel@toc {italian}{}
-\contentsline {section}{\numberline {1}L'algoritmo PageRank}{3}% 
-\contentsline {subsection}{\numberline {1.1}Storia}{4}% 
-\contentsline {section}{\numberline {2}Basi di dati a grafo}{5}% 
-\contentsline {subsection}{\numberline {2.1}I principali Graph DBMS}{6}% 
-\contentsline {subsection}{\numberline {2.2}Il Graph DBMS Neo4J}{6}% 
+\contentsline {section}{\numberline {1}Introduzione}{3}% 
+\contentsline {section}{\numberline {2}Motivazioni}{4}% 
+\contentsline {subsection}{\numberline {2.1}Formato dei dati}{4}% 
+\contentsline {subsection}{\numberline {2.2}Il preprocessing dei dati}{7}% 
+\contentsline {subsection}{\numberline {2.3}Basi di dati a grafo}{8}% 
+\contentsline {subsubsection}{\numberline {2.3.1}I principali Graph DBMS}{9}% 
+\contentsline {subsubsection}{\numberline {2.3.2}Il Graph DBMS Neo4J}{9}% 
+\contentsline {section}{\numberline {3}L'algoritmo PageRank}{13}% 
+\contentsline {subsection}{\numberline {3.1}Storia}{14}% 
+\contentsline {subsection}{\numberline {3.2}Formulazione}{14}% 
+\contentsline {subsection}{\numberline {3.3}Tecnica}{14}% 
+\contentsline {section}{\numberline {4}L'implementazione}{17}% 
+\contentsline {subsection}{\numberline {4.1}Il linguaggio Scala}{17}% 
+\contentsline {subsection}{\numberline {4.2}La generazione del grafo}{17}% 
