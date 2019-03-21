@@ -1,4 +1,5 @@
-\documentclass[a4paper,12pt]{article}
+\documentclass[a4paper, 12pt]{article}
+% \usepackage[leftm=2in]{geometry}
 \usepackage[italian]{babel}
 \usepackage[utf8]{inputenc}
 \usepackage{graphicx} %per aggiungere le immagini
@@ -12,13 +13,16 @@
 \let\oldsection\section
 \renewcommand\section{\clearpage\oldsection}
 
-% \newenvironment{cypher}{\begin{lstlisting}[keepspaces=true]}{\end{lstlisting}}
+\newcommand{\citazioni}{cit}
+\newcommand{\coautori}{coa}
+\newcommand{\altroindice}{t}
 
-\title{Tesi di Laurea}
+\title{Analisi di reti di citazioni tramite PageRank e relazioni di collaborazione}
 \author{Lorenzo Gabriele}
 
 \pagenumbering{arabic}
-\linespread{1.25}
+\linespread{2.0}
+
 \begin{document}
 
 \maketitle
@@ -30,6 +34,23 @@
 
 \section{Motivazioni}
 
+\subsection{Il Mining Bibliografico}
+Il lavoro proposto si inserisce all'interno dell'ambito della branca del data mining che va sotto il nome di mining bibliografico. Tale branca nasce con l'obiettivo di ottenere informazioni statisticamente utili sugli articoli scientifici, sui loro autori, sulle loro collaborazioni a partire dal grande quantitativo di dati presente online. \\
+I database bibliografici online, come DBLP in informatica e PubMed in scienze mediche, contengono abbondanti informazioni sulle pubblicazioni di ricerca in diversi campi. Ciascuno di questi database costituisce una gigantesca rete di informazioni, che collega in modo complesso documenti di ricerca, autori, conferenze, riviste e possibilmente anche informazioni sulle citazioni e fornisce un terreno fertile per l'analisi delle reti di informazioni.
+\subsubsection{Bibliometria e bibliomining}
+Nata ben prima del data mining è la bibliometria. La bibliometria, in senso lato, è un'analisi statistica di pubblicazioni scritte, come libri o articoli. I metodi bibliometrici sono frequentemente usati nel campo della biblioteconomia e della scienza dell'informazione. La bibliometria viene utilizzata per fornire un'analisi quantitativa della letteratura accademica o per valutare la spesa di bilancio. L' analisi delle citazioni è un metodo bibliometrico comunemente usato che si basa sulla costruzione del grafico delle citazioni, una rappresentazione di rete o grafico delle citazioni tra documenti. Molti campi di ricerca utilizzano metodi bibliometrici per esplorare l'impatto del loro campo, l'impatto di una serie di ricercatori, l'impatto di un particolare articolo o per identificare documenti particolarmente di impatto all'interno di uno specifico campo di ricerca.
+\par
+Il bibliomining è l'uso di una combinazione di data mining e bibliometria allo scopo di analizzare i servizi di libreria. Il termine è stato creato nel 2003 da Scott Nicholson, Assistant Professor della Syracuse University School of Information Studies, al fine di distinguere il data mining bibliografico da altri tipi di data mining.
+\subsubsection{Reti di citazioni}
+Una delle pratiche di mining bibliografico più diffuse è quella di analisi delle reti di citazioni. \\
+Una rete di citazione è un grafo orientato in cui i nodi sono rappresentati da articoli (o autori di articoli) e gli archi sono costituiti dalle citazioni presenti tra gli articoli. Nel caso del grafo degli articoli la relazione di citazione rappresenta un arco non pesato in cui sono possibili due soli stati per l'arco: citazione presente e citazione non presente.
+Nel caso, invece, del grafo degli autori, gli archi tra gli autori sono di tipo pesato. \\
+Il peso degli archi è definito come di seguito: per due generici nodi $A$ e $B$, l'arco orientato da $A$ a $B$ con peso $n$ rappresenta un numero totale di citazioni di articoli scritti dall'autore $A$ ad articoli scritti dall'autore $B$ pari ad $n$.
+\subsubsection{Reti di collaborazione}
+Semanticamente vicine alle reti di citazioni, le reti di collaborazione sono un concetto atto a quantificare la collaborazione tra autori.
+Una rete di collaborazione è un grafo orientato in cui i nodi sono rappresentati da autori e gli archi sono costituiti dalle collaborazioni tra gli autori. Il concetto di collaborazione si può quantificare, con buona approssimazione, utilizzando le coauthorships, ovvero contando il numero di articoli. Nel caso del grafo degli articoli la relazione di citazione rappresenta un arco non pesato in cui sono possibili due soli stati per l'arco: citazione presente e citazione non presente.
+Nel caso, invece, del grafo degli autori, gli archi tra gli autori sono di tipo pesato. \\
+Il peso degli archi è definito come di seguito: per due generici nodi $A$ e $B$, l'arco orientato da $A$ a $B$ con peso $n$ rappresenta un numero totale di citazioni di articoli scritti dall'autore $A$ ad articoli scritti dall'autore $B$ pari ad $n$.
 
 
 \subsection{Formato dei dati}
@@ -108,7 +129,7 @@ Separando le stringhe utilizzando come separatore la virgola si ottengono dunque
   \item la lista degli id delle referenze
   \item la lista dei nomi degli autori
 \end{itemize}
-Le due liste suddette si possono ora separare utilizzando come separatore il punto e virgola, ottenendo infine 
+Le due liste suddette si possono ora separare utilizzando come separatore il punto e virgola, ottenendo infine gli autori e gli articoli referenziati distinti.
 
 \subsection{Basi di dati a grafo}
 Per l'elaborazione dei dati relativi alle varie relazioni tra autori e articoli accademici, si è visto naturale l'utilizzo di una base di dati a grafo. \\
@@ -126,7 +147,8 @@ Tra le opzioni presenti, la scelta è ricaduta su Neo4J, il dbms di grafi più d
 Non essendoci la necessità di esecuzione in cloud si è scelto di utilizzare la distribuzione community. \\
 Neo4J introduce un suo linguaggio di querying per l'interazione dell'utente con il database. Tale linguaggio nasce con l'obiettivo di essere facilmente leggibile e comprensibile dagli utenti, fornendo, allo stesso tempo, le features necessarie a gestire convenientemente i grafi, a differenza del classico linguaggio SQL.
 \par
-Di seguito si fornisce una breve panoramica delle possibilità del linguaggio Cypher. \\
+Di seguito si fornisce una breve panoramica delle possibilità del linguaggio Cypher.
+\subsubsection{Il linguaggio Cypher}
 I nodi del grafo sono rappresentati, nelle query Cypher, da un nome racchiuso tra due parentesi tonde (che rappresentano la circonferenza con cui si suole rappresentare i nodi nelle rappresentazioni grafiche dei grafi). La ricerca nel database si effettua attraverso l'istruzione MATCH seguita dall'oggetto da cercare.
 MATCH (a) seleziona tutti i nodi del grafo, che vengono rappresentati nella query dal nome "a". Sono selezionati tutti i nodi del grafo perché non sono presenti vincoli.
 MATCH (a: Author) seleziona, invece, i nodi che hanno come tipo Author. I tipi non vanno dichiarati precedentemente all'uso, ma lo schema è generato dinamicamente. Il tipo Author farà parte del database quando sarà creato il primo nodo di tale tipo.
@@ -182,7 +204,7 @@ Larry Page e Sergey Brin, i due co-fondatori di Google, svilupparono l'algoritmo
 
 \subsection{Formulazione}
 Sia $ V = \{ 1, 2, 3, \ldots \} $ un insieme di nodi.
-
+\pagebreak
 \subsection{Tecnica}
 Si propone di seguito la tecnica proposta il calcolo dello score per la classificazione degli autori. \\
 La tecnica consiste nel calcolo del PageRank dei nodi utilizzando, come pesi degli archi, il numero di citazioni prima e lo stesso numero di citazioni moltiplicato per un coefficiente peggiorativo. Una volta ottenuti questi due punteggi, la loro combinazione attraverso una funzione permette di ottenere il risultato finale.
@@ -211,23 +233,23 @@ Il procedimento illustrato si compone dei seguenti passi:
   Per ogni coppia di nodi $ (i, j) $, $ p_{ij} $ sarà uguale al numero di citazioni del nodo $ i $ ad articoli scritti dal nodo $ j $. 
   \item
   Si calcola poi il PageRank: 
-  \[
+  \begin{equation}
   P_k(i) = 
     \begin{cases} 
       \displaystyle \frac{1}{n} & k = 1 \\
       \displaystyle \frac
         {\displaystyle \sum_{j=1}^{n} p_{ji}}
-        {\displaystyle \sum_{t=1}^{n} {\sum_{j=1}^{n} p_{jt}}}
+        {\displaystyle \sum_{\altroindice=1}^{n} {\sum_{j=1}^{n} p_{j\altroindice}}}
         P_{k-1}(j) & k > 1 
 
     \end{cases} 
-  \]
+  \end{equation}
   dove $ k $ è il numero di iterazioni necessarie alla convergenza dell'algoritmo. L'algoritmo, basato sul metodo delle potenze (\textit{power iteration}), parte da un'approssimazione iniziale, in cui è assegnata probabilità eguale a tutti i nodi. Ad ogni iterazione aggiorna le probabilità calcolando un'approssimazione più accurata rispetto a quella dell'iterazione precedente.
   \par
   Il criterio di arresto classico dell'algoritmo consiste nella stima del miglioramento della soluzione tra l'iterazione $k$-esima e l'iterazione $k-1$-esima; ovvero nella valutazione della norma 1 tra il vettore dei PageRank all'iterazione $k$-esima e quello all'iterazione precedente:
-  \[
+  \begin{equation*}
     \Delta^{(k)} = \Arrowvert P^{(k)} - P^{(k+1)}\Arrowvert
-  \]
+  \end{equation*}
   Quando tale valore risulta essere sotto una certa soglia, si può considerare l'algoritmo giunto a convergenza.
   \par
   All'atto pratico spesso si preferisce stabilire a priori il numero di iterazioni che l'algoritmo dovrà svolgere. Questa è la scelta fatta da Neo4J e Apache Spark all'atto di implementare l'algoritmo di PageRank.
@@ -237,12 +259,13 @@ Il procedimento illustrato si compone dei seguenti passi:
   In questo caso il peso dell'arco da un generico nodo $i$ ad un generico nodo $j$ è calcolato tenendo conto, oltre che del numero di citazioni del nodo $i$ ad articoli scritti dal nodo $j$, dell'indice di collaborazione tra i due autori e del numero di citazioni considerando il verso opposto, ovvero le citazioni del nodo $j$ ad articoli scritti dal nodo $i$. \\
   Questi parametri non sono considerati in senso assoluto. Bensì vengono considerati rapportati alle relazioni che il nodo citato ha con altri autori.
   Il generico peso è definito come segue:
-  \[
-    p_{ij} = 
+  \begin{equation}
+  \begin{split}
+    pm_{ij} = 
     \left( 
       \frac
-      {\displaystyle cit_{ji}}
-      {\displaystyle \sum_{t=1}^{n} {cit_{jt}}}
+      {\displaystyle \citazioni_{ji}}
+      {\displaystyle \sum_{\altroindice=1}^{n} {\citazioni_{j\altroindice}}}
     \right)
     \bullet
     \left(
@@ -250,22 +273,53 @@ Il procedimento illustrato si compone dei seguenti passi:
       \left(
       \alpha_1
       \frac
-      {\displaystyle cit_{ij}}
-      {\displaystyle \sum_{s=1}^{n} {cit_{is}}}
+      {\displaystyle \citazioni_{ij}}
+      {\displaystyle \sum_{\altroindice=1}^{n} {\citazioni_{i\altroindice}}}
       +
       \alpha_2
       \frac
-      {\displaystyle coa_{ij}}
-      {\displaystyle \sum_{s=1}^{n} {coa_{is}}}
+      {\displaystyle \coautori_{ij}}
+      {\displaystyle \sum_{\altroindice=1}^{n} {\coautori_{i\altroindice}}}
       \right)
-    \right)
+    \right) \\ \\
+    \text{ con }
+    \alpha_1 \text{ e }  \alpha_2 \text{  t. c. } 0 \leq \alpha_i \leq 1 \text{ } \wedge \text{ } \sum_i {\alpha_i} = 1
+  \end{split}
+  \end{equation} 
+    
+   
+  
+  Nella formula sopra riportata si può notare come si effettuino due diverse normalizzazioni per la parte classica del peso $p_{ij}$ e per la parte che tiene conto dell'indice di collaborazione. \\
+  Il numero di citazioni del nodo $j$ al nodo $i$ sono poste in rapporto al numero di citazioni che il nodo $j$ ha rispetto a tutti gli autori. \\
+  Diversamente, invece, il numero di citazioni che il nodo $i$ ha nei confronti del nodo $j$ (le citazioni considerate in senso inverso) sono pesate rispetto al numero di articoli, di qualsiasi autore, che il nodo $i$ ha citato. \\
+  Stessa cosa avviene per il numero di collaborazioni. Non siamo interessati al numero di collaborazioni del nodo citante, bensi a quelle del nodo citato.
+  \par
+  Queste due diverse stime sono combinate attraverso una combinazione convessa dei coefficienti $\alpha_1$ e $\alpha_2$ i quali, nell'implementazione dell'algoritmo sono stati posti nel caso della media aritmetica e nei due casi limite $\alpha_1 = 0$ e $\alpha_2 = 1$ e viceversa.  
+
+  \item 
+  Ottenuta la nuova matrice di pesi, si passa al calcolo del PageRank. Per garantire l'invariante dell'algoritmo, secondo cui la somma dei pesi di una riga deve essere $1$ (rappresentando questa la somma delle probabilità di muoversi da un nodo ad un altro, probabilità che devono essere spalmate tra i diversi nodi), si effettua una seconda normalizzazione sui pesi calcolati. Questa volta la normalizzazione rimane quella dell'algoritmo classico e fa riferimento agli archi uscenti del nodo citante.
+  \[  
+    Pmod_k(i) = 
+    \begin{cases} 
+      \displaystyle \frac{1}{n} & k = 1 \\
+      \displaystyle \frac
+        {\displaystyle \sum_{j=1}^{n} pm_{ji}}
+        {\displaystyle \sum_{t=1}^{n} {\sum_{j=1}^{n} pm_{jt}}}
+        Pmod_{k-1}(j) & k > 1 
+
+    \end{cases} 
   \]
   
-  Nella formula sopra riportata si può notare come si effettuino due diverse normalizzazioni per la parte classica del peso $p_{ij}$ e per la parte che tiene conto dell'indice di collaborazione. Il numero di citazioni dell'arco entrante
+  \item
+  Ottenuti ora i due vettori $P$ e $Pmod$ il calcolo del vettore degli score avviene attraverso la differenza logaritmica:
+  \[
+    S_i = log(P_i) - log(Pmod_i) 
+  \]
+
 \end{enumerate}
 
 \section{L'implementazione}
-Per l'implementazione finale è stata fatta la scelta di utilizzare un implementazione custom dell'algoritmo PageRank e dei suoi derivati. \\
+Per l'implementazione finale è stata fatta la scelta di avere un'implementazione custom dell'algoritmo PageRank e dei suoi derivati. \\
 Tale scelta è stata dettata dal fatto che il livello di prestazioni ottenibili utilizzando le basi di dati a grafo non erano ragionevoli per eseguire il lavoro sulla mole di dati a disposizione.
 \subsection{Il linguaggio Scala}
 L'implementazione è stata svolta nel linguaggio di programmazione Scala. \\
@@ -273,7 +327,7 @@ Il linguaggio Scala, linguaggio staticamente tipato basato sulla Java Virtual Ma
 \subsection{La generazione del grafo}
 Per la generazione del grafo a partire dalla versione filtrata e compattata del dataset si è utilizzato un metodo multi-fase.
 \begin{enumerate}
-  \item In primo luogo è stato necessario ottenere gli autori distinti e ordinati. L'ordinamento è necessario per l'utilizzo dell'algoritmo di ricerca binaria. Per ottenere gli autori distinti e ordinati si è, in un primo momento, utilizzata una struttura dati TreeSet, struttura dati che naturalmente mantiene l'ordinamento degli oggetti. Una volta inserite le stringhe contenenti i nomi degli autori nel TreeSet è sufficiente convertire l'insieme in un array per risolvere il problema. In un secondo momento si è optato per una soluzione più efficiente. Costruendo prima un ArrayBuilder (struttura dati che mantiene un array dinamicamente crescente per la costruzione degli array), calcolando i distinti (operazione che dietro le quinte costruisce un HashSet mutabile e lo riempie) ed infine applicando l'algoritmo quickSort per ordinare l'array. Questa ottimizzazione ottiene un miglioramento delle performance di quasi un ordine di grandezza.
+  \item In primo luogo è stato necessario ottenere gli autori distinti e ordinati. L'ordinamento è necessario per l'utilizzo dell'algoritmo di ricerca binaria. Per ottenere gli autori distinti e ordinati si è, in un primo momento, utilizzata una struttura dati TreeSet, struttura dati che naturalmente mantiene l'ordinamento degli oggetti. Una volta inserite le stringhe contenenti i nomi degli autori nel TreeSet è sufficiente, infatti, convertire l'insieme in un array per ottenere la lista ordinata. In un secondo momento si è optato per una soluzione più efficiente. Costruendo prima un ArrayBuilder (struttura dati che mantiene un array dinamicamente crescente per la costruzione degli array), calcolando gli elementi distinti ed infine applicando l'algoritmo quickSort per ordinare l'array. Questa ottimizzazione ottiene un miglioramento delle performance di quasi un ordine di grandezza.
   \begin{lstlisting}[keepspaces=true]
 def authorsArray(file: Array[Line], numLines: Int):
     Array[String] = {
@@ -292,6 +346,103 @@ def authorsArray(file: Array[Line], numLines: Int):
   authors
 }    
   \end{lstlisting}
-  \item Una volta ottenuti gli autori distinti il passo successivo è stato quello di 
+  \item Una volta ottenuti gli autori distinti il passo successivo è stato quello di creare una struttura dati per mantenere le informazioni sulle relazioni. Si tratta di una matrice rappresentata come matrice sparsa. La rappresentazione come matrice sparsa è utile perché, per ogni autore, il numero di collaborazioni e di citazioni è piuttosto basso. Il costo quadratico di una rappresentazione matriciale sarebbe stato inutile e computazionalmente costosissimo. La struttura dati usata è stata, dunque, un Array di ArrayBuffer di Array di interi. Il primo array contiene alla posizione $i$-esima la lista delle citazioni ricevute, all'interno di un ArrayBuffer, struttura dati del linguaggio Scala rappresentante un array di dimensione variabile. Tale lista contiene degli Array di interi di dimensione fissa contenenti la posizione dell'autore citante nella matrice, e la lista delle statistiche (numero di coautori, numero di citazioni, numero di citazioni ad articoli scritti come da coautori, ecc.).
+  \begin{lstlisting}[keepspaces=true]
+val relazioni: Array[mutable.ArrayBuffer[Array[Int]]] = Array.fill(authors.length)(mutable.ArrayBuffer.empty)
+
+var autoriArticolo = new Array[Array[Int]](numArticoli)
+cfor(0)(_ < numLines, _ + 1) { index =>
+  val line = file(index)
+  for (ref <- line.references)
+    if (autoriArticolo(ref) == null)
+      autoriArticolo(ref) = Array.empty
+  val authsIdx: Array[Int] =
+    line.authors.map(a => binarySearch(authors, a))
+  autoriArticolo(line.id) = authsIdx
+}
+  \end{lstlisting}
+  \item Un'altra struttura dati utilizzata è quella che mantiene, per ogni articolo, la lista degli indici dei suoi autori. Per riempire questa seconda matrice è stata utilizzato l'algoritmo di ricerca binaria.
+  Per ogni riga del file e per ogni autori di tale articolo si è utilizzata la ricerca binaria per ottenere l'indice di riga a partire dalla stringa del nome.
+  \item Una terza scansione, infine è stata necessaria per riempire la matrice delle relazioni. Scandendo gli articoli, per ogni articolo si sono presi gli autori, e la stessa cosa è stata fatta per gli autori degli articoli citati. A questo punto è stata aggiunta una entry nella lista delle citazioni per gli autori non ancora citati, è stato, invece, incrementato il contatore delle citazioni per gli autori già citati. Per avere, successivamente, la possibilità di una migliore scrematura delle citazioni, sono state suddivise in diverse categorie:
+  \begin{enumerate}
+    \item citazioni da un autore A ad un autore B in cui non ci sono relazioni tra A e B per quanto riguarda gli articoli in oggetto.
+    \item citazioni da un autore A ad un autore B in cui l'autore dell'articolo citante (l'autore A) è anche coautore dell'articolo citato (coautore di B).
+    \item citazioni da un autore A ad un autore B in cui l'autore dell'articolo citato (l'autore B) è anche coautore dell'articolo citante (coautore di A).
+    \item citazioni da un autore A ad un autore B in cui in cui entrambi gli autori sono coautori degli articoli citante e citato. 
+  \end{enumerate}
+  \begin{lstlisting}[keepspaces=true]
+cfor(0)(_ < numLines, _ + 1) { index =>
+  val line = file(index)
+  for (ref <- line.references; citer <- autoriArticolo(line.id);
+        cited <- autoriArticolo(ref)) {
+    val tipo =
+      if (cited != citer) {
+        val isCitaComeCoautoreA = autoriArticolo(ref).contains(citer)
+        val isCitaComeCoautoreB = autoriArticolo(line.id).contains(cited)
+
+        if (isCitaComeCoautoreA && isCitaComeCoautoreB)
+          CitaComeCoautoreAAndB
+        else if (isCitaComeCoautoreA)
+          CitaComeCoautoreA
+        else if (isCitaComeCoautoreB)
+          CitaComeCoautoreB
+        else
+          Cita
+      } else Cita
+
+    incrementValueIn(relazioni(citer), cited, tipo)
+  }
+}  
+\end{lstlisting}
+Una volta generato il grafo con tutte le informazioni necessarie è stato esportato in un formato testuale come lista di archi per essere processato dall'algoritmo di PageRank.
+Il formato utilizzato è stato una lista di numeri separati da spazi secondo tale convenzione:
+\begin{lstlisting}[keepspaces=true]
+autoreCitante autoreCitato statistica1 statistica2 ...
+\end{lstlisting}
+Questo file sarà importato dal programma di PageRank ad ogni test.
 \end{enumerate}
+\subsection{L'implementazione del PageRank}
+A valle della generazione del grafo (operazione maggiormente onerosa) c'è stata la vera e propria implementazione dell'algoritmo PageRank.
+A differenza della generazione del grafo che è un'operazione svolta una tantum, l'algoritmo di PageRank deve essere eseguito diverse volte con parametri diversi, per valutarne i risultati. Dunque la velocità di esecuzione risulta essere maggiormente importante in questo caso. Per ottenere le performance migliori possibili, oltre ad utilizzare codice ottimizzato utilizzando strutture dati di livello più basso possibile (array) e strutture di controllo imperative a basso livello (while) al posto di paradigmi più eleganti da un punto di vista del codice ma meno performanti, è stato utilizzato il parallelismo per rendere parallele tutte le operazioni più onerose che lavorano su insiemi distinti.
+\subsubsection{Computazione parallela}
+La parallelizzazione del codice è stata enormemente semplificata dalla scelta progettuale di utizzare il linguaggio Scala. Questo possiede un costrutto molto comodo, chiamato ``Parallel Range'' che permette l'iterazione su un range numerico in modo parallelo.
+Ad esempio, si noti questo codice:
+\begin{lstlisting}[keepspaces=true]
+val a = new Array[Int](1000)
+val b = new Array[Int](1000)
+// Inizializzazione array ...
+val c = new Array[Int](1000)
+for(i <- 0.to(1000)) {
+  c(i) = a(i) + b(i)
+}
+\end{lstlisting}
+Una volta creati 3 array da 1000 elementi, per ogni indice $i$ inserisce la somma dei valori dei primi due array in quell'indice nel terzo array. \\
+Questo è un esempio di codice parallelizzabile. Infatti il risultato della somma non dipende dai valori degli altri indici diversi da $i$. \\
+Per rendere parallelo il codice è necessario rendere il ``Range'' $0.to(1000)$ un range parallelo chiamando il metodo $par$. Tale metodo suddivide il range in parti uguali in numero eguale al numero dei processori disponibili sulla macchina e manda in esecuzione il blocco di codice a thread diversi.
+\subsubsection{Lettura parallela da file}
+Anche la lettura del file del grafo è stata resa parallela grazie a principio appena esposto. Per evitare la suddivizione del file in lettura è stato fatto un preprocessing del file: attraverso l'utility bash ``split'' si è suddiviso questo per righe in 8 parti uguali (il numero di processori della macchina) e si è fatta una lettura parallela dei files utilizzando il range parallelo precedentemente esposto:
+\begin{lstlisting}[keepspaces=true]
+for (lines <- filesLines.par; line <- lines) {
+  val st = split(line, ' ')
+  val citatore = st(0).toInt
+  val citato = st(1).toInt
+  val coautori = st(2).toShort
+  val citazioni =
+    (st(3).toShort + st(5).toShort).toShort
+  locks(citato).synchronized {
+    if (citatiCreazione(citato) == null) {
+      citatiCreazione(citato) = mutable.ArrayBuilder.make[Int]
+      citazioniCreazione(citato) = mutable.ArrayBuilder.make[Short]
+      coautoriCreazione(citato) = mutable.ArrayBuilder.make[Short]
+    }
+    citatiCreazione(citato) += citatore
+    coautoriCreazione(citato) += coautori
+    citazioniCreazione(citato) += citazioni
+  }
+}
+for (file <- files) file.close()
+\end{lstlisting}
+Per evitare problemi di race conditions è stato utilizzato un array di lucchetti utilizzando i monitor nativi di Java.
+\subsubsection{L'implementazione del PageRank}
+Lo stesso algoritmo PageRank è stato implementato massimizzando il parallelismo.
 \end{document}
