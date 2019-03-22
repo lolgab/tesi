@@ -7,7 +7,7 @@
 \usepackage{tabularx}
 \usepackage{amsmath}
 
-\lstset{basicstyle=\ttfamily\footnotesize,breaklines=true}
+\lstset{basicstyle=\ttfamily}
 
 % interruzione di pagina tra le section
 \let\oldsection\section
@@ -286,9 +286,7 @@ Il procedimento illustrato si compone dei seguenti passi:
     \alpha_1 \text{ e }  \alpha_2 \text{  t. c. } 0 \leq \alpha_i \leq 1 \text{ } \wedge \text{ } \sum_i {\alpha_i} = 1
   \end{split}
   \end{equation} 
-    
-   
-  
+      
   Nella formula sopra riportata si può notare come si effettuino due diverse normalizzazioni per la parte classica del peso $p_{ij}$ e per la parte che tiene conto dell'indice di collaborazione. \\
   Il numero di citazioni del nodo $j$ al nodo $i$ sono poste in rapporto al numero di citazioni che il nodo $j$ ha rispetto a tutti gli autori. \\
   Diversamente, invece, il numero di citazioni che il nodo $i$ ha nei confronti del nodo $j$ (le citazioni considerate in senso inverso) sono pesate rispetto al numero di articoli, di qualsiasi autore, che il nodo $i$ ha citato. \\
@@ -424,7 +422,7 @@ Anche la lettura del file del grafo è stata resa parallela grazie a principio a
 \begin{lstlisting}[keepspaces=true]
 for (lines <- filesLines.par; line <- lines) {
   val st = split(line, ' ')
-  val citatore = st(0).toInt
+  val citante = st(0).toInt
   val citato = st(1).toInt
   val coautori = st(2).toShort
   val citazioni =
@@ -435,7 +433,7 @@ for (lines <- filesLines.par; line <- lines) {
       citazioniCreazione(citato) = mutable.ArrayBuilder.make[Short]
       coautoriCreazione(citato) = mutable.ArrayBuilder.make[Short]
     }
-    citatiCreazione(citato) += citatore
+    citatiCreazione(citato) += citante
     coautoriCreazione(citato) += coautori
     citazioniCreazione(citato) += citazioni
   }
@@ -444,5 +442,179 @@ for (file <- files) file.close()
 \end{lstlisting}
 Per evitare problemi di race conditions è stato utilizzato un array di lucchetti utilizzando i monitor nativi di Java.
 \subsubsection{L'implementazione del PageRank}
-Lo stesso algoritmo PageRank è stato implementato massimizzando il parallelismo.
+Lo stesso algoritmo PageRank è stato implementato massimizzando il parallelismo. L'algoritmo ha una complessità trattabile, il che lo rende, all'atto pratico, veloce da computare, anche su grafi di grandi dimensioni. La complessità temporale dell'algoritmo è, infatti, lineare rispetto al numero di archi.
+\par
+L'algoritmo utilizza una struttura dati parziale che serve alla normalizzazione. E' necessario calcolare la somma dei pesi di tutti gli archi uscenti da ogni nodo. Questa operazione viene fatta a monte del calcolo del PageRank. Per questo esiste una funzione pubblica denominata ``pageRank'' che calcola l'array ``sommaPesiUscenti'' e poi chiama la funzione privata ``pageRankImpl'' contenente l'implementazione:
+\begin{lstlisting}[keepspaces=true]
+def pageRank(citati: Matrice[Int],
+              pesiPageRank: Matrice[Double],
+              iterations: Int,
+              dampingFactor: Double = 0.85): Array[Double] = {
+  val sommaPesiUscenti = Array.fill[Double](citati.length)(0.0)
+
+  cfor(0)(_ < citati.length, _ + 1) { i =>
+    if (citati(i) != null) {
+      val cI = citati(i)
+      val cILength = cI.length
+      cfor(0)(_ < cILength, _ + 1) { j =>
+        val citante = cI(j)
+        sommaPesiUscenti(citante) += pesiPageRank(i)(j)
+      }
+    }
+  }
+
+  pageRankImpl(citati,
+                pesiPageRank,
+                iterations,
+                dampingFactor,
+                sommaPesiUscenti)
+}
+\end{lstlisting}
+La funzione scandisce gli archi del grafo computando la somma dei pesi degli archi uscenti dal nodo citante.
+Di seguito si mostra, invece, l'implementazione della funzione che esegue il calcolo vero e proprio del PageRank:
+\begin{lstlisting}[keepspaces=true]
+def pageRankImpl(citati: Matrice[Int],
+                 pesiPageRank: Matrice[Double],
+                 iterations: Int,
+                 dampingFactor: Double = 0.85,
+                 sommaPesiUscenti: Array[Double]):Array[Double] = {
+
+  val pageRanksPrevIteration: Array[Double] =
+    Array.fill(citati.length)(1.0 / citati.length)
+  val pageRanks: Array[Double] =
+    Array.fill(citati.length)(0.0)
+  val damp: Double = (1.0 - dampingFactor) / citati.length
+
+  cfor(0)(_ < iterations, _ + 1) { iteration =>
+    for (i <- citati.indices.par; if citati(i) != null) {
+      var pageRankI: Double = 0.0
+      val cI = citati(i)
+      val cILength = cI.length
+      val prI = pesiPageRank(i)
+      cfor(0)(_ < cILength, _ + 1) { j =>
+        val citante = cI(j)
+        val somma = sommaPesiUscenti(citante)
+        val pesoNormalizzato: Double =
+          if (somma == 0.0) 0.0 else prI(j) / somma
+        pageRankI += pageRanksPrevIteration(citante) * pesoNormalizzato
+      }
+      pageRanks(i) = damp + dampingFactor * pageRankI
+    }
+    cfor(0)(_ < pageRanks.length, _ + 1) { i =>
+      pageRanksPrevIteration(i) = pageRanks(i)
+    }
+  }
+  pageRanks
+}
+\end{lstlisting}
+Questa inizializza il vettore dei pagerank assegnando probabilità distribuite uniformemente tra i nodi.
+Poi itera il procedimento per un numero prefissato di iterazioni. Ad ogni iterazione computa il valore attuale del vettore dei pagerank utilizzando i valori dell'iterazione precedente. Tra un'iterazione e l'altra viene effettuata la copia del vettore ``pageRanks'' nel vettore ``pageRanksPrevIteration''.
+\par
+Il fatto che il valore del pagerank $i$-esimo dipenda solo dal vettore della precedente iterazione (costante nel momento del calcolo) e dalla matrice dei pesi (anch'essa costante), rende l'algoritmo parallelizzabile.
+Quindi, utilizzando un range parallelo, si itera sui nodi. Per ogni nodo si itera sui suoi archi entranti sommando al pagerank del nodo il pagerank della precedente iterazione del noto citante moltiplicato per il peso normalizzato sui suoi pesi uscenti.
+\par
+Una volta ottenuto il valore di pagerank se ne fa la media pesata con la probabilità di teletrasporto, che è uniformemente distribuita tra tutti i nodi. Il peso di tale media è il cosiddetto ``damping factor'', che sperimentalmente viene posto, in molte implementazioni, pari a 0.85. 
+
+\subsection{L'implementazione del PageRank modificato}
+Come detto in precedenza, il PageRank modificato non fa altro che agire a monte dell'algoritmo di PageRank, creando una matrice dei pesi che dà in pasto all'implementazione classica.
+Dalla firma della funzione si può notare che essa riceve, oltre alla matrice sparsa dei citati, ovvero la matrice contenente gli id dei nodi che hanno almeno una citazione nel nodo in oggetto, le matrici che contengono le statistiche prese in esame dall'algoritmo modificato.
+\begin{lstlisting}
+def pageRankMod(citati: Matrice[Int],
+  citazioni: Matrice[PesiType],
+  coautori: Matrice[PesiType],
+  sommaCoautori: Array[PesiType],
+  iterazioni: Int,
+  dampingFactor: Double = 0.85): Array[Double] = {
+\end{lstlisting}
+Poi calcola la somma delle citazioni uscenti da ogni nodo (necessarie per la normalizzazione):
+\begin{lstlisting}
+  val numAutori = citati.length
+  val sommaCitazioniDate = new Array[PesiType](numAutori)
+
+  cfor(0)(_ < numAutori, _ + 1) { i =>
+    if (citati(i) != null) {
+      cfor(0)(_ < citati(i).length, _ + 1) { j =>
+        val citante = citati(i)(j)
+        sommaCitazioniDate(citante) =
+          (sommaCitazioniDate(citante) + citazioni(i)(j)).toShort
+      }
+    }
+  }
+\end{lstlisting}
+Tali somme sono usate nella normalizzazione delle citazioni uscenti ed entranti da ogni nodo:
+\begin{lstlisting}  
+  val citazioniDateNormalizzate: Matrice[Double] =
+    new Matrice[Double](numAutori)
+  val citazioniRicevuteNormalizzate: Matrice[Double] =
+    new Matrice[Double](numAutori)
+  val coautoriNormalizzati: Matrice[Double] =
+    new Matrice[Double](numAutori)
+
+  for (i <- citati.indices.par) {
+    if (citati(i) != null) {
+      citazioniDateNormalizzate(i) = Array.fill[Double](citati(i).length)(0.0)
+      citazioniRicevuteNormalizzate(i) =
+        Array.fill[Double](citati(i).length)(0.0)
+      coautoriNormalizzati(i) = Array.fill[Double](citati(i).length)(0.0)
+
+      val cI = citati(i)
+      val cILength = cI.length
+      cfor(0)(_ < cILength, _ + 1) { j =>
+        val citante = cI(j)
+        citazioniRicevuteNormalizzate(i)(j) = {
+          val n = sommaCitazioniDate(citante)
+          if (n == 0.toShort) 
+            0.0 
+          else 
+            citazioni(i)(j).toDouble / n
+        }
+        citazioniDateNormalizzate(i)(j) = {
+          val n = sommaCitazioniDate(i)
+          if (n == 0.toShort) 0.0
+          else {
+            val ci = citati(citante)
+            if (ci != null) {
+              def met: Double = {
+                cfor(0)(_ < ci.length, _ + 1) { k =>
+                  if (ci(k) == i) {
+                    return citazioni(citante)(k).toDouble / n
+                  }
+                }
+                0.0
+              }
+              met
+            } else 0.0
+          }
+        }
+\end{lstlisting}
+Stessa cosa avviene per la normalizzazione del numero di collaborazioni. Il numero di collaborazioni viene, infatti, normalizzato rispetto al numero di collaborazioni totali del nodo citato.
+\begin{lstlisting} 
+        coautoriNormalizzati(i)(j) = {
+          val n = sommaCoautori(i)
+          if (n == 0.toShort) 0.0 else coautori(i)(j).toDouble / n
+        }
+      }
+    }
+  }
+\end{lstlisting}
+Calcolati tutti i parametri normalizzati si procede al calcolo degli effettivi pesi da dare in pasto all'algoritmo pageRank:
+\begin{lstlisting}
+  val pesiPageRank = new Matrice[Double](numAutori)
+  for (i <- citati.indices.par; if citati(i) != null) {
+    pesiPageRank(i) = Array.fill[Double](citati(i).length)(0.0)
+
+    val cI = citati(i)
+    val cILength = cI.length
+    cfor(0)(_ < cILength, _ + 1) { j =>
+      pesiPageRank(i)(j) = citazioniRicevuteNormalizzate(i)(j) * (1 - (coautoriNormalizzati(i)(j) + citazioniDateNormalizzate(
+        i)(j)) / 2.0 )
+    }
+  }
+\end{lstlisting}
+Infine si procede chiamando la funzione pageRank con l'implementazione classica:
+\begin{lstlisting}
+  pageRank(citati, pesiPageRank, iterazioni, dampingFactor)
+}
+\end{lstlisting}
+
 \end{document}
