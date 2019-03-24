@@ -1,9 +1,20 @@
+Titolo:
+Analisi di reti di citazioni tramite PageRank e relazioni di collaborazione
+Title
+Citation networks analysis using PageRank and collaboration relationships
+
+Abstract
+Nell'ambito dell'analisi di reti di citazioni, si propone una tecnica per lo studio della visibilità degli autori di articoli scientifici.
+Essa consiste nel misurare la visibilità attraverso l'algoritmo PageRank e la variazione di tale visibilità quando si considera la rete di collaborazione, al fine di considerare quanto la rete di collaborazione condizioni la visibilità dell'autore.
+
+In the field of citations network analysis, a new technique aims at quantifying authors visibility in relation to collaborations.
+The proposed technique is about measuring authors visibility through the PageRank algorithm and studying the variation of this score when the collaboration network is considered. The main goal is to estimate how much the collaboration network affects author's visibility.
+
+
 Capitoli:
 
 - Descrizione scenario, problematica, formato dei dati ecc.
 - Tecnica preliminare: descrizione del page rank (storia ecc)
 - Tecnica proposta: modifica del pagerank e dei pesi
 - Esperimenti.
-- Parti studiate dal punto del software (NEO4J) (tra descrizione e 
-tecnica). 
-- Disambiguazione dei nomi.
+- Parti studiate dal punto del software (NEO4J) (tra descrizione e tecnica).

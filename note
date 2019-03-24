@@ -1,3 +1,39 @@
 rimuovere le autocitazioni e fare i grafici in tutti e due i modi.
 fare l'istogramma per contare per quanti autori il conteggio è diverso.
 fare il l'istogramma cumulativo del valore assoluto della differenza. dovrebbe crescere subito e poi schiacciarsi ad uno, perché i due pagerank sono simili, quindi per la maggior parte degli autori si comportano in modo uguale.
+
+tenendo conto del grafo delle citazioni al di fuori della propria rete di collaborazione. Ridurre l'impatto delle citazioni della "rete di collaborazione".
+
+Modificare le probabilità di citazioni (di transizione) simultaneamente su tutto il grafo. Non va autore per autore a fare l'analisi, ma applica la modifica globalmente.
+
+Impatto - Influenza - Visibilità 
+decidere il termine giusto
+
+USARE VISIBILITA'
+
+Visibilità al di fuori della mia rete di collaborazione.
+
+Z-Score dividendo in gruppi logaritmici (1-10,10-100, 100-1000)
+
+
+Logaritmo va fatto in base 10!!!
+
+\begin{equation}
+
+\begin{align}
+
+algorithm2e
+
+\begin{multline}
+
+Introduzione delle reti bibliografiche
+
+Ricerca su tecniche di mining su reti bibliografiche (5 pag.)
+1)reti di citazioni
+2) reti di coautori
+3) reti bibliografiche
+
+Generale su mining.
+
+Analisi comparativa delle varie versioni.
+sono insiemi distinti gli outliers per i coautori e quelli per le citazioni.
