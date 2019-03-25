@@ -1,11 +1,11 @@
 \documentclass[a4paper, 12pt]{article}
-% \usepackage[leftm=2in]{geometry}
 \usepackage[italian]{babel}
 \usepackage[utf8]{inputenc}
 \usepackage{graphicx} %per aggiungere le immagini
 \usepackage{listings} %per aggiungere codice sorgente
 \usepackage{tabularx}
 \usepackage{amsmath}
+\usepackage[linesnumbered,lined,boxed,commentsnumbered]{algorithm2e}
 
 \lstset{basicstyle=\ttfamily}
 
@@ -16,6 +16,11 @@
 \newcommand{\citazioni}{cit}
 \newcommand{\coautori}{coa}
 \newcommand{\altroindice}{t}
+\newcommand{\pagerankModificato}{Pmod}
+\newcommand{\pesiPagerankModificato}{pmod}
+\newcommand{\pagerank}{P}
+\newcommand{\pesiPagerank}{p}
+
 
 \title{Analisi di reti di citazioni tramite PageRank e relazioni di collaborazione}
 \author{Lorenzo Gabriele}
@@ -40,7 +45,7 @@ Tra i metodi di analisi oggi utilizzati vi è l'algoritmo PageRank. Nato inizial
 Il lavoro proposto si inserisce all'interno dell'ambito della branca del data mining che va sotto il nome di mining bibliografico. Tale branca nasce con l'obiettivo di ottenere informazioni statisticamente utili sugli articoli scientifici, sui loro autori, sulle loro collaborazioni a partire dal grande quantitativo di dati presente online. \\
 I database bibliografici online, come DBLP in informatica e PubMed in scienze mediche, contengono abbondanti informazioni sulle pubblicazioni di ricerca in diversi campi. Ciascuno di questi database costituisce una gigantesca rete di informazioni, che collega in modo complesso documenti di ricerca, autori, conferenze, riviste e possibilmente anche informazioni sulle citazioni e fornisce un terreno fertile per l'analisi delle reti di informazioni.
 \subsubsection{Bibliometria e bibliomining}
-Nata ben prima del data mining è la bibliometria. La bibliometria, in senso lato, è un'analisi statistica di pubblicazioni scritte, come libri o articoli. I metodi bibliometrici sono frequentemente usati nel campo della biblioteconomia e della scienza dell'informazione. La bibliometria viene utilizzata per fornire un'analisi quantitativa della letteratura accademica o per valutare la spesa di bilancio. L' analisi delle citazioni è un metodo bibliometrico comunemente usato che si basa sulla costruzione del grafico delle citazioni, una rappresentazione di rete o grafico delle citazioni tra documenti. Molti campi di ricerca utilizzano metodi bibliometrici per esplorare l'impatto del loro campo, l'impatto di una serie di ricercatori, l'impatto di un particolare articolo o per identificare documenti particolarmente di impatto all'interno di uno specifico campo di ricerca.
+Nata ben prima del data mining è la bibliometria. La bibliometria, in senso lato, è un'analisi statistica di pubblicazioni scritte, come libri o articoli. I metodi bibliometrici sono frequentemente usati nel campo della biblioteconomia e della scienza dell'informazione. La bibliometria viene utilizzata per fornire un'analisi quantitativa della letteratura scientifica o per valutare la spesa di bilancio. L' analisi delle citazioni è un metodo bibliometrico comunemente usato che si basa sulla costruzione del grafico delle citazioni, una rappresentazione di rete o grafico delle citazioni tra documenti. Molti campi di ricerca utilizzano metodi bibliometrici per esplorare l'impatto del loro campo, l'impatto di una serie di ricercatori, l'impatto di un particolare articolo o per identificare documenti particolarmente di impatto all'interno di uno specifico campo di ricerca.
 \par
 Il bibliomining è l'uso di una combinazione di data mining e bibliometria allo scopo di analizzare i servizi di libreria. Il termine è stato creato nel 2003 da Scott Nicholson, Assistant Professor della Syracuse University School of Information Studies, al fine di distinguere il data mining bibliografico da altri tipi di data mining.
 \subsubsection{Reti di citazioni}
@@ -56,7 +61,7 @@ Il peso degli archi è definito come di seguito: per due generici nodi $A$ e $B$
 
 
 \subsection{Formato dei dati}
-Per poter effettuare lo studio era necessario lavorare su dati reali. Una stima della qualità degli autori di testi accademici con la pretesa di essere più efficace a stimare la effettiva rilevanza, deve essere valorata da dati reali, possibilmente in numero sufficiente affinché siano considerabili statisticamente rilevanti.
+Per poter effettuare lo studio era necessario lavorare su dati reali. Una stima della qualità degli autori di testi scientifici con la pretesa di essere più efficace a stimare la effettiva rilevanza, deve essere valorata da dati reali, possibilmente in numero sufficiente affinché siano considerabili statisticamente rilevanti.
 \par
 In un primo momento si è pensato di utilizzare, come fonte da cui ricavare i dati, un servizio on-line di consultazione degli articoli come Scopus. \\ 
 La maniera di ottenere i dati sarebbe dovuta essere incrementale.
@@ -133,9 +138,25 @@ Separando le stringhe utilizzando come separatore la virgola si ottengono dunque
 \end{itemize}
 Le due liste suddette si possono ora separare utilizzando come separatore il punto e virgola, ottenendo infine gli autori e gli articoli referenziati distinti.
 
-\subsection{Basi di dati a grafo}
-Per l'elaborazione dei dati relativi alle varie relazioni tra autori e articoli accademici, si è visto naturale l'utilizzo di una base di dati a grafo. \\
-Questo particolare tipo di base di dati offre le ottimizzazioni necessarie a rappresentare un enorme numero di relazioni tra entità, in modo dinamico, senza dover racchiudere lo schema in convenzionali tabelle. Offre, altresì, convenienti operazioni e algoritmi pre-implementati per l'analisi e l'elaborazione dei grafi, tra i quali risulta presente anche il PageRank.
+A questo punto l'esempio di oggetto articolo si riduce a:
+\begin{lstlisting}
+013ea675-bb58-42f8-a423-f5534546b2b1,
+4f4f200c-0764-4fef-9718-b8bccf303dba;
+aa699fbf-fabe-40e4-bd68-46eaf333f7b1,
+Leon A. Sakkal,Kyle Z. Rajkowski,Roger S. Armen
+\end{lstlisting}
+
+Non essendo interessante al fine di quantificare il numero di citazioni, gli id degli articoli sono stati sostituiti da degli identificativi numerici. Questo sia per comprimere i dati senza perdere le informazioni utili, sia per velocizzare il successivo trasporto degli articoli su una struttura dati array.
+In seguito alla traformazione le righe si presentano così:
+\begin{lstlisting}
+123,425;2345,Leon A. Sakkal,Kyle Z. Rajkowski,
+Roger S. Armen
+\end{lstlisting}
+A partire da tale preprocessing si è passati alla importazione e alla creazione degli effettivi grafi delle citazioni e delle collaborazioni.
+
+\subsection{Basi di dati di grafi}
+Per l'elaborazione dei dati relativi alle varie relazioni tra autori e articoli, si è visto naturale l'utilizzo delle basi di dati di grafi. \\
+Questo particolare tipo di base di dati offre le ottimizzazioni necessarie a rappresentare un grande numero di relazioni tra entità, in modo dinamico, senza dover racchiudere lo schema in convenzionali tabelle. Offre, altresì, convenienti operazioni e algoritmi pre-implementati per l'analisi e l'elaborazione dei grafi, tra i quali risulta presente anche l'algoritmo PageRank.
 \par
 La principale caratteristica che differenzia le basi di dati di grafi rispetto alle classiche basi di dati relazionali è che le operazioni di join, mentre nel modello relazionale sono svolte a tempo di interrogazione, facendo il matching delle chiavi primarie e delle chiavi esterne di tutte le righe della nelle tabelle interrogate, operazione tra l'altro pesante sia dal punto di vista computazionale che dell'utilizzo di memoria, sono ottimizzate conservando le relazioni all'interno dei nodi stessi. Viene incrementata, così, la dimensione su disco del database, a vantaggio di una ridotta complessità delle operazioni di join.
 Le basi di dati di grafi ricadono nella categoria delle basi di dati NoSQL, ovvero nella categoria delle basi di dati create con l'intento di superare i limiti delle tradizionali basi di dati relazionali. Mentre condividono con gli altri database NoSQL l'idea che non debba essere necessario definire staticamente il modello della base di dati in modo preventivo al suo utilizzo, differiscono per quanto riguarda la strategia di memorizzazione dei dati.
@@ -145,6 +166,10 @@ Il classico linguaggio SQL, sebbene abbia potenza sufficiente a rappresentare la
 \subsubsection{I principali Graph DBMS}
 
 \subsubsection{Il Graph DBMS Neo4J}
+\begin{figure}[h!]
+  \includegraphics[width=\linewidth]{images/neo4j.png}
+  \caption{Neo4J Developement Environment}
+\end{figure}
 Tra le opzioni presenti, la scelta è ricaduta su Neo4J, il dbms di grafi più diffuso sulla piattaforma Java. Esso possiede due diverse distribuzioni: neo4j-community e neo4j-enterprise. La distribuzione enterprise è pensata per l'utilizzo in cloud, offrendo soluzioni con un maggiore parallelismo per l'esecuzione degli algoritmi, la possibilità di eseguire algoritmi su cluster, e, a dire degli autori, un runtime per l'esecuzione delle query in linguaggio Cypher del 70\% più veloce. \\
 Non essendoci la necessità di esecuzione in cloud si è scelto di utilizzare la distribuzione community. \\
 Neo4J introduce un suo linguaggio di querying per l'interazione dell'utente con il database. Tale linguaggio nasce con l'obiettivo di essere facilmente leggibile e comprensibile dagli utenti, fornendo, allo stesso tempo, le features necessarie a gestire convenientemente i grafi, a differenza del classico linguaggio SQL.
@@ -182,7 +207,7 @@ Anche le relazioni possono avere, come i nodi, dei campi. Questi si definiscono 
   CREATE (a)-[:COAUTHOR {times: 1}]->(b)
 \end{lstlisting}
 Per poter inserire qualcosa che si avvicini alla nozione di pesi di un arco, è utile poter inserire un contatore numerico, aggiornandolo ad ogni nuovo matching.
-Per questo scopo esiste una seconda parola chiave del linguaggio Cypher che equivale a fare match su un nodo o su una relazione in fase di creazione; se il matching esiste allora si esegue una sotto-query relativa al matching, se non esiste, invece, si esegue un'altra sotto-query relativa alla creazione.
+Per questo scopo esiste una seconda parola chiave del linguaggio Cypher, la parola chiave ``MERGE''. Essa equivale a fare match su un nodo o su una relazione in fase di creazione; se il matching esiste allora si esegue una sotto-query relativa al matching, se non esiste, invece, si esegue una sotto-query relativa alla creazione.
 \begin{lstlisting}[keepspaces=true]
   MATCH (a: Author {name: "Giuseppe Rossi"}),
         (b: Author {name: "Francesco Bianchi"})
@@ -190,8 +215,44 @@ Per questo scopo esiste una seconda parola chiave del linguaggio Cypher che equi
   ON CREATE SET c.times = 1
   ON MATCH  SET c.times = c.times + 1
 \end{lstlisting}
-Eseguendo questa query ripetutamente è possibile incrementare il contatore "times" associato all'arco. E' questo il caso, ad esempio dell'importazione batch di nodi e archi del grafo. \\
+Eseguendo questa query ripetutamente è possibile incrementare il contatore "times" associato all'arco. E' questo il caso, ad esempio dell'importazione batch di nodi e archi del grafo.
+Neo4J permette l'importazione diretta attraverso la parola chiave Cypher LOAD CSV:
+\begin{lstlisting}
+LOAD CSV FROM 'file://artists.csv' AS line
+CREATE (:Artist { name: line[1], year: toInteger(line[2])})
+\end{lstlisting}
+Utilizzando la parola chiave LOAD CSV è possibile fare il parsing di un file di testo comma separated values e creare nodi durante la scansione. \\
+Il problema di tale pratica è che l'intera operazione viene fatta all'interno della stessa transazione. Nel caso di file csv di grandissime dimensioni questo può riempire la memoria. E' necessario uno strumento per dividere l'importazione in tante transazioni separate. \\
+Il linguaggio Cypher mette a disposizione la funzione ``USING PERIODIC COMMIT'' che, ricevendo un numero intero rappresentante la cardinalità di righe da computare prima di eseguire il commit, divide l'operazioni in tante, più piccole, e dunque gestibili, transazioni.
 
+\subsubsection{Le estensioni di Neo4J}
+Il DBMS Neo4J permette la creazione di estensioni per aggiungere funzioni utilizzabili attraverso le query Cypher. \\
+Tra le estensioni più utilizzate su piattaforma Neo4J vi sono quelle del pacchetto Apoc. \\
+Queste forniscono implementazioni diverse dell'algoritmo PageRank, e funzioni per lanciare query batch su grandi quantità di dati.
+Per il calcolo del PageRank, le librerie Apoc offrono diverse versioni:
+\begin{enumerate}
+  \item pageRank \\
+  Questa è la versione classica dell'algoritmo che calcola il pageRank sui nodi selezionati passati come parametro.
+  \item pageRankWithConfig \\
+  Questa versione dell'algoritmo riceve, inoltre, una configurazione sul numero di iterazioni e sulle label delle relazioni da considerare nel calcolo.
+  \item pageRankWithCypher \\
+  Questa versione, la più generale tra quelle disponibili nella libreria, riceve una query Cypher che deve ritornare, un insieme di nodi ed un insieme di archi con associati dei pesi. Tali informazioni saranno usate nel calcolo del PageRank.
+  \begin{lstlisting}
+CALL apoc.algo.pageRankWithCypher({
+  iterations:5, write:true, 
+  node_cypher:
+  'MATCH (p:Person) return id(p) as id',
+  rel_cypher: 
+  'MATCH (p:Person)-->()<--(o:Person)
+  return id(p) as source,
+  id(o) as target, 1 as weight'
+});
+\end{lstlisting} 
+
+\par
+Sebbene le basi di dati di grafi, come Neo4J, offrano molte utilità per l'elaborazione dei grafi, tra cui linguaggi molto potenti per l'interrogazione, non hanno le performance adeguate a gestire grafi di milioni di nodi e centinaia di milioni di archi. \\
+E' stata, dunque, implementata una soluzione custom per importare i dati e per eseguire il PageRank sopra tali dati.
+\end{enumerate}
 
 \section{L'algoritmo PageRank}
 PageRank è un algoritmo introdotto da Google per classificare le pagine web. 
@@ -212,21 +273,20 @@ Si propone di seguito la tecnica proposta il calcolo dello score per la classifi
 La tecnica consiste nel calcolo del PageRank dei nodi utilizzando, come pesi degli archi, il numero di citazioni prima e lo stesso numero di citazioni moltiplicato per un coefficiente peggiorativo. Una volta ottenuti questi due punteggi, la loro combinazione attraverso una funzione permette di ottenere il risultato finale.
 \par
 Il procedimento illustrato si compone dei seguenti passi:
-\begin{lstlisting}[keepspaces=true]
-  1)  Definizione della matrice dei pesi p(i, j)
-  
-  2)  Per ogni nodo i:
-        Calcolo del pagerank P(i) con pesi p 
-
-  3)  Calcolo della nuova matrice dei pesi 
-      pmod(i, j) = p(i, j) * (1 - c(i, j))
-      
-  4)  Per ogni nodo i:
-        Calcolo del pagerank Pmod(i) con pesi pmod
-        
-  5)  Per ogni nodo i:
-        Calcolo dello score s(i) = log(Pmod(i)) - log(P(i))
-\end{lstlisting}
+\begin{algorithm}
+Definizione della matrice dei pesi p(i, j)\;
+\For{$i \leftarrow $ } {
+  Calcolo del pagerank $P_{i}$ con pesi p\;
+}
+Calcolo della matrice dei pesi modificati 
+$pmod_{ij} = p_{ij} \dot (1 - c(i, j))$\;
+\For{$i \leftarrow $ } {
+  Calcolo del pagerank $\pagerankModificato_{i}$ con pesi $\pesiPagerankModificato$\;
+}
+\For{$i \leftarrow $ } {
+  Calcolo dello score $s_i = log_{10}(\pagerankModificato_{i}) - log(P_{i})$
+}
+\end{algorithm}
 
 
 \begin{enumerate}
@@ -258,12 +318,36 @@ Il procedimento illustrato si compone dei seguenti passi:
   \item
   Si passa poi a calcolare la nuova matrice di pesi per il calcolo del PageRank modificato. L'obiettivo è limitare la modifica dell'algoritmo alla sola matrice dei pesi, in modo da lasciare inalterato l'algoritmo.
   \par
-  In questo caso il peso dell'arco da un generico nodo $i$ ad un generico nodo $j$ è calcolato tenendo conto, oltre che del numero di citazioni del nodo $i$ ad articoli scritti dal nodo $j$, dell'indice di collaborazione tra i due autori e del numero di citazioni considerando il verso opposto, ovvero le citazioni del nodo $j$ ad articoli scritti dal nodo $i$. \\
-  Questi parametri non sono considerati in senso assoluto. Bensì vengono considerati rapportati alle relazioni che il nodo citato ha con altri autori.
-  Il generico peso è definito come segue:
+  Per una famiglia di statistiche sulla collaborazione, che chiameremo $s$, la formula di calcolo della matrice di pesi $\pesiPagerankModificato$ è la seguente:
   \begin{equation}
   \begin{split}
-    pm_{ij} = 
+    \pesiPagerankModificato_{ij} = 
+    \left( 
+      \frac
+      {\displaystyle \citazioni_{ji}}
+      {\displaystyle \sum_{\altroindice=1}^{n} {\citazioni_{j\altroindice}}}
+    \right)
+    \bullet
+    \left(
+      1 - 
+      \sum_{h=1}^w{ 
+        \alpha_h
+        \frac
+        {\displaystyle s^h_{ij}}
+        {\displaystyle \sum_{\altroindice=1}^{n} {s^h_{i\altroindice}}}
+      }
+    \right) \\ \\
+    \text{ con }
+    \alpha \text{  t. c. } 0 \leq \alpha_h \leq 1 \text{ } \forall h \wedge \text{ } \sum_h {\alpha_h} = 1
+  \end{split}
+  \end{equation}
+  \par
+  All'atto pratico, la famiglia di statistiche utilizzate si riduce a due: il numero di citazioni ricevute dal nodo citante e il numero di collaborazioni. Il peso dell'arco da un generico nodo $i$ ad un generico nodo $j$ è calcolato, dunque, tenendo conto, oltre che del numero di citazioni del nodo $i$ ad articoli scritti dal nodo $j$, dell'indice di collaborazione tra i due autori e del numero di citazioni considerando il verso opposto, ovvero le citazioni del nodo $j$ ad articoli scritti dal nodo $i$. \\
+  Questi parametri non sono considerati in senso assoluto. Bensì vengono considerati rapportati alle relazioni che il nodo citato ha con altri autori.
+  Il generico peso, nel caso studiato, è definito come segue:
+  \begin{equation}
+  \begin{split}
+    \pesiPagerankModificato_{ij} = 
     \left( 
       \frac
       {\displaystyle \citazioni_{ji}}
@@ -288,7 +372,7 @@ Il procedimento illustrato si compone dei seguenti passi:
     \alpha_1 \text{ e }  \alpha_2 \text{  t. c. } 0 \leq \alpha_i \leq 1 \text{ } \wedge \text{ } \sum_i {\alpha_i} = 1
   \end{split}
   \end{equation} 
-      
+
   Nella formula sopra riportata si può notare come si effettuino due diverse normalizzazioni per la parte classica del peso $p_{ij}$ e per la parte che tiene conto dell'indice di collaborazione. \\
   Il numero di citazioni del nodo $j$ al nodo $i$ sono poste in rapporto al numero di citazioni che il nodo $j$ ha rispetto a tutti gli autori. \\
   Diversamente, invece, il numero di citazioni che il nodo $i$ ha nei confronti del nodo $j$ (le citazioni considerate in senso inverso) sono pesate rispetto al numero di articoli, di qualsiasi autore, che il nodo $i$ ha citato. \\
@@ -299,21 +383,21 @@ Il procedimento illustrato si compone dei seguenti passi:
   \item 
   Ottenuta la nuova matrice di pesi, si passa al calcolo del PageRank. Per garantire l'invariante dell'algoritmo, secondo cui la somma dei pesi di una riga deve essere $1$ (rappresentando questa la somma delle probabilità di muoversi da un nodo ad un altro, probabilità che devono essere spalmate tra i diversi nodi), si effettua una seconda normalizzazione sui pesi calcolati. Questa volta la normalizzazione rimane quella dell'algoritmo classico e fa riferimento agli archi uscenti del nodo citante.
   \[  
-    Pmod_k(i) = 
+    \pagerankModificato_k(i) = 
     \begin{cases} 
       \displaystyle \frac{1}{n} & k = 1 \\
       \displaystyle \frac
-        {\displaystyle \sum_{j=1}^{n} pm_{ji}}
-        {\displaystyle \sum_{t=1}^{n} {\sum_{j=1}^{n} pm_{jt}}}
-        Pmod_{k-1}(j) & k > 1 
+        {\displaystyle \sum_{j=1}^{n} \pesiPagerankModificato_{ji}}
+        {\displaystyle \sum_{t=1}^{n} {\sum_{j=1}^{n} \pesiPagerankModificato_{jt}}}
+        \pagerankModificato_{k-1}(j) & k > 1 
 
     \end{cases} 
   \]
   
   \item
-  Ottenuti ora i due vettori $P$ e $Pmod$ il calcolo del vettore degli score avviene attraverso la differenza logaritmica:
+  Ottenuti ora i due vettori $P$ e $\pagerankModificato$ il calcolo del vettore degli score avviene attraverso la differenza logaritmica:
   \[
-    S_i = log(P_i) - log(Pmod_i) 
+    S_i = log(P_i) - log(\pagerankModificato_i) 
   \]
 
 \end{enumerate}
@@ -618,5 +702,8 @@ Infine si procede chiamando la funzione pageRank con l'implementazione classica:
   pageRank(citati, pesiPageRank, iterazioni, dampingFactor)
 }
 \end{lstlisting}
+
+\section{Analisi dei dati}
+Utilizzando gli algoritmi descritti negli scorsi capitoli si sono svolte le analisi dei dati sperimentali.
 
 \end{document}
