@@ -5,10 +5,10 @@
 \usepackage{listings} %per aggiungere codice sorgente
 \usepackage{tabularx}
 \usepackage{amsmath}
+\usepackage{amsfonts}
 \usepackage[linesnumbered,lined,boxed,commentsnumbered]{algorithm2e}
-
+\usepackage{float}
 \lstset{basicstyle=\ttfamily}
-
 % interruzione di pagina tra le section
 \let\oldsection\section
 \renewcommand\section{\clearpage\oldsection}
@@ -37,8 +37,8 @@
 
 \section{Introduzione}
 Insieme con l'enorme quantità di dati riguardanti le pubblicazioni scientifiche disponibile nei database online, come Dblp nell'ambito dell'informatica e Pubmed in quello delle scienze biomediche, è nata l'idea di utilizzare algoritmi matematici e statistici per ricavare dati utili sulle pubblicazioni e sui loro autori. \\
-Tra i metodi di analisi oggi utilizzati vi è l'algoritmo PageRank. Nato inizialmente per valutare la popolarità delle pagine web, viene utilizzato per stimare la probabilità di un autore di essere citato da altri autori al fine di valutarne la rilevanza.
-\par Si propone una tecnica per valutare la rilevanza degli autori basata su una modifica dell'algoritmo PageRank, affinché essa sia valutata al di fuori dalla rete di collaborazione degli autori.
+Tra i metodi di analisi oggi utilizzati vi è l'algoritmo PageRank. Nato inizialmente per valutare la popolarità delle pagine web, viene utilizzato per stimare la probabilità di un autore di essere citato da altri autori al fine di valutarne la visibilità.
+\par Si propone una tecnica per valutare la visibilità degli autori basata su una modifica dell'algoritmo PageRank, affinché essa sia valutata al di fuori dalla loro rete di collaborazione.
 
 \section{Inserire un titolo...}
 \subsection{Il Mining Bibliografico}
@@ -59,101 +59,6 @@ Una rete di collaborazione è un grafo orientato in cui i nodi sono rappresentat
 Nel caso, invece, del grafo degli autori, gli archi tra gli autori sono di tipo pesato. \\
 Il peso degli archi è definito come di seguito: per due generici nodi $A$ e $B$, l'arco orientato da $A$ a $B$ con peso $n$ rappresenta un numero totale di citazioni di articoli scritti dall'autore $A$ ad articoli scritti dall'autore $B$ pari ad $n$.
 
-
-\subsection{Formato dei dati}
-Per poter effettuare lo studio era necessario lavorare su dati reali. Una stima della qualità degli autori di testi scientifici con la pretesa di essere più efficace a stimare la effettiva rilevanza, deve essere valorata da dati reali, possibilmente in numero sufficiente affinché siano considerabili statisticamente rilevanti.
-\par
-In un primo momento si è pensato di utilizzare, come fonte da cui ricavare i dati, un servizio on-line di consultazione degli articoli come Scopus. \\ 
-La maniera di ottenere i dati sarebbe dovuta essere incrementale.
-Per incrementale si intende il non costuire l'intero dataset a priori dell'analisi dei nodi del grafo, bensì costruire il sotto-grafo "centrato" rispetto ad un autore.
-Quindi, scegliendo un autore, si analizzano i suoi articoli, le referenze di tali articoli, ed infine dagli autori delle referenze è possibile stabilire un collegamento tra i due autori. \\
-L'approccio descritto possiede almeno due aspetti negativi non trascurabili,
-La procedura ha una complessità elevata e richiede una ripetutamente l'interrogazione di un servizio online, quale Scopus, che vieta espressamente le pratiche di Data Mining attraverso l'utilizzo delle loro API. \\
-Dunque si è cercata una strada differente che permettesse di analizzare localmente una grande quantità di dati.
-\par
-Come scelta definitiva si è utilizzato un dataset ospitato dal sito aminer.org. Tale sito si prefige l'obiettivo di riunire i dati di quanti più articoli possibili, relativamente a pubblicazioni del macro-ambito della computer science. \\
-aminer.org aggiorna ogni anno il suo dataset, rilasciandone una nuova versione. Nella versione 10 (la versione di cui si fa riferimento in questo lavoro) possiede un numero di poco superiore ai 3 milioni di articoli. \\
-\begin{figure}[h!]
-  \includegraphics[width=\linewidth]{images/aminer.jpg}
-  \caption{Il sito web dell'organizzazione aminer.org}
-\end{figure}
-
-Il dataset presenta i dati nel formato JSON. Contiene un diverso oggetto JSON per ogni articolo. Gli oggetti sono disposti nel file suddivisi per riga.
-Per ogni articolo sono presenti i seguenti campi: \\
-\begin{tabularx}{\textwidth}{| X | X | X | X |}
-\hline \textbf{Nome Campo} & \textbf{Tipo Campo} & \textbf{Descrizione} & \textbf{Esempio} \\
-\hline id & stringa & id della pubblicazione & ``013ea675-bb58-42f8-a423-f5534546b2b1''\\
-\hline title & stringa & titolo della pubblicazione & ``Dynamic analysis of a pest-epidemic model with impulsive control'' \\
-\hline authors & lista di stringhe & autori della pubblicazione & [``Leon A. Sakkal'', ``Kyle Z. Rajkowski'', ``Roger S. Armen'']\\
-\hline venue & stringa & sede di pubblicazione & ``Neural Networks'' \\
-\hline year & intero & anno di pubblicazione & 1994 \\
-\hline n\_citation & intero & sede di pubblicazione & 24 \\
-\hline references & stringa & lista delle citazioni & [``013ea675-bb58-42f8-a423-f5534546b2b1'', ``c043e258-256f-4957-8ac5-899905eb4efd'']\\
-\hline abstract & stringa & sommario & ``In this work we propose schemes for joint modelorder and step-size adaptation of reduced-rank adaptive filters \ldots''\\
-\hline
-\end{tabularx}
-
-Di seguito si mostra un esempio di oggetto JSON del dataset rappresentante un articolo:
-\begin{lstlisting}[keepspaces=true]
-{
-  "authors": [
-    "Leon A. Sakkal",
-    "Kyle Z. Rajkowski",
-    "Roger S. Armen"
-  ],
-  "n_citation": 0,
-  "references": [
-    "4f4f200c-0764-4fef-9718-b8bccf303dba",
-    "aa699fbf-fabe-40e4-bd68-46eaf333f7b1"
-  ],
-  "title":
-      "Prediction of consensus binding mode geometries
-      for related chemical series of positive allosteric
-      modulators of adenosine and muscarinic acetylcholine
-      receptors",
-  "venue": "Journal of Computational Chemistry",
-  "year": 2017,
-  "id": "013ea675-bb58-42f8-a423-f5534546b2b1"
-}
-\end{lstlisting}
-\subsection{Il preprocessing dei dati}
-Il formato JSON, sebbene pratico ed efficace per lo sviluppo, ad esempio, di API di servizi online e per la memorizzazione di dati senza una precisa strutturizzazione, non si presta ad elaborazione di grandi quantità di dati. Questo per almeno due motivi:
-\begin{enumerate}
-  \item Spreca molti dati per la memorizzazione dei caratteri di controllo (inizio/fine di un oggetto o di una lista, virgolette di apertura/chiusura delle stringhe). Inoltre aggiunge le stringhe contenenti i nomi dei campi per ogni oggetto, anche se gli oggetti si riferiscono ad uno stesso schema.
-  \item L'interpretazione di un oggetto non è un'operazione banale come può essere quella di distinguere i campi di un file csv (comma separated values). La struttura ricorsiva del JSON richiede della computazione che per dataset di dimensione di diversi Gigabyte può diventare un overhead rilevante.
-\end{enumerate}
-
-Per ovviare a tali problemi si è deciso di agire con un primo preprocessing. Si sono filtrati i soli dati rilevanti agli scopi del lavoro in oggetto. In particolare, per ogni articolo, si sono mantenute le sole informazioni dell'id dell'articolo, la lista degli autori e la lista delle referenze. Si è sostituito, inoltre, il dispendioso formato JSON con un formato CSV leggermente modificato per poter distinguere le liste degli autori e delle referenze.
-\par
-Il formato scelto per la memorizzazione si presenta così:
-\begin{lstlisting}[keepspaces=true]
-id_articolo,ref_1;ref_2,autore_1;autore_2;autore_2
-\end{lstlisting}
-Si è memorizzato un articolo per ogni riga. In questo modo è possibile utilizzare il carattere fine-linea per distinguere gli articoli tra loro.
-Separando le stringhe utilizzando come separatore la virgola si ottengono dunque tre stringhe contenenti:
-\begin{itemize}
-  \item l'id
-  \item la lista degli id delle referenze
-  \item la lista dei nomi degli autori
-\end{itemize}
-Le due liste suddette si possono ora separare utilizzando come separatore il punto e virgola, ottenendo infine gli autori e gli articoli referenziati distinti.
-
-A questo punto l'esempio di oggetto articolo si riduce a:
-\begin{lstlisting}
-013ea675-bb58-42f8-a423-f5534546b2b1,
-4f4f200c-0764-4fef-9718-b8bccf303dba;
-aa699fbf-fabe-40e4-bd68-46eaf333f7b1,
-Leon A. Sakkal,Kyle Z. Rajkowski,Roger S. Armen
-\end{lstlisting}
-
-Non essendo interessante al fine di quantificare il numero di citazioni, gli id degli articoli sono stati sostituiti da degli identificativi numerici. Questo sia per comprimere i dati senza perdere le informazioni utili, sia per velocizzare il successivo trasporto degli articoli su una struttura dati array.
-In seguito alla traformazione le righe si presentano così:
-\begin{lstlisting}
-123,425;2345,Leon A. Sakkal,Kyle Z. Rajkowski,
-Roger S. Armen
-\end{lstlisting}
-A partire da tale preprocessing si è passati alla importazione e alla creazione degli effettivi grafi delle citazioni e delle collaborazioni.
-
 \subsection{Basi di dati di grafi}
 Per l'elaborazione dei dati relativi alle varie relazioni tra autori e articoli, si è visto naturale l'utilizzo delle basi di dati di grafi. \\
 Questo particolare tipo di base di dati offre le ottimizzazioni necessarie a rappresentare un grande numero di relazioni tra entità, in modo dinamico, senza dover racchiudere lo schema in convenzionali tabelle. Offre, altresì, convenienti operazioni e algoritmi pre-implementati per l'analisi e l'elaborazione dei grafi, tra i quali risulta presente anche l'algoritmo PageRank.
@@ -166,11 +71,11 @@ Il classico linguaggio SQL, sebbene abbia potenza sufficiente a rappresentare la
 \subsubsection{I principali Graph DBMS}
 
 \subsubsection{Il Graph DBMS Neo4J}
-\begin{figure}[h!]
+\begin{figure}[H]
   \includegraphics[width=\linewidth]{images/neo4j.png}
   \caption{Neo4J Developement Environment}
 \end{figure}
-Tra le opzioni presenti, la scelta è ricaduta su Neo4J, il dbms di grafi più diffuso sulla piattaforma Java. Esso possiede due diverse distribuzioni: neo4j-community e neo4j-enterprise. La distribuzione enterprise è pensata per l'utilizzo in cloud, offrendo soluzioni con un maggiore parallelismo per l'esecuzione degli algoritmi, la possibilità di eseguire algoritmi su cluster, e, a dire degli autori, un runtime per l'esecuzione delle query in linguaggio Cypher del 70\% più veloce. \\
+Tra le opzioni presenti, la scelta è ricaduta su Neo4J \cite{neo4j}, il dbms di grafi più diffuso sulla piattaforma Java. Esso possiede due diverse distribuzioni: neo4j-community e neo4j-enterprise. La distribuzione enterprise è pensata per l'utilizzo in cloud, offrendo soluzioni con un maggiore parallelismo per l'esecuzione degli algoritmi, la possibilità di eseguire algoritmi su cluster, e, a dire degli autori, un runtime per l'esecuzione delle query in linguaggio Cypher del 70\% più veloce. \\
 Non essendoci la necessità di esecuzione in cloud si è scelto di utilizzare la distribuzione community. \\
 Neo4J introduce un suo linguaggio di querying per l'interazione dell'utente con il database. Tale linguaggio nasce con l'obiettivo di essere facilmente leggibile e comprensibile dagli utenti, fornendo, allo stesso tempo, le features necessarie a gestire convenientemente i grafi, a differenza del classico linguaggio SQL.
 \par
@@ -254,18 +159,28 @@ Sebbene le basi di dati di grafi, come Neo4J, offrano molte utilità per l'elabo
 E' stata, dunque, implementata una soluzione custom per importare i dati e per eseguire il PageRank sopra tali dati.
 \end{enumerate}
 
-\section{L'algoritmo PageRank}
-PageRank è un algoritmo introdotto da Google per classificare le pagine web. 
+\section{La tecnica proposta}
+La tecnica proposta utilizza l'algoritmo PageRank per fornire una stima della variazione della visibilità degli autori considerando la variazione di impatto della rete di collaborazione. 
+
+\subsection{Nozioni preliminari}
+Si danno di seguito le nozioni preliminari e le definizioni utilizzate nei paragrafi successivi.
+\subsubsection{Grafo di citazioni}
+Dato un insieme di Nodi $V$ e un insieme di archi orientati pesati $E$ si definisce $G = (V,E)$ il grafo delle citazioni. Tale grafo associa agli archi un peso $p_e\in\mathbb{N}$ tale che per ogni coppia di nodi $v_i, v_j \in V$, $p_{ij}$ corrisponde al numero di citazioni totali del nodo $v_i$ incidenti sul nodo $v_j$.
+\subsubsection{Grafo multipeso}
+Dato un insieme di Nodi $V$ e un insieme di archi orientati pesati $E$ si definisce $G^m = (V,E^m)$ il grafo delle citazioni arricchito. Tale grafo associa agli archi una famiglia di pesi $p^m_e\in\mathbb{N}$ tale che per ogni coppia di nodi $v_i, v_j \in V$ e per ogni statistica $s_k$ con $k \in \{0,1..w \}$, $p^m_{ijk}$ corrisponde alla statistica $k$-esima del nodo $v_i$ incidente sul nodo $v_j$.
+
+\subsection{L'algoritmo PageRank}
+PageRank \cite{Page98thepagerank} è un algoritmo introdotto da Google per classificare le pagine web. 
 Nasce dalla necessità del motore di ricerca di avere un ordinamento delle pagine web rispetto alla loro importanza. Esso funziona contando il numero di link delle pagine web per avere una stima approssimativa della qualità e dell'importanza di un sito web. L'assunzione su cui questo si basa è quella che, tantopiù una pagina è importante, più tende a ricevere collegamenti dalle altre pagine.
-\begin{figure}[h!]
+\begin{figure}[H]
   \includegraphics[width=\linewidth]{images/pagerank.jpg}
   \caption{Rappresentazione grafica del ranking con PageRank}
 \end{figure}
 Dal punto di vista matematico il PageRank di una pagina è definito in modo ricorsivo e dipende dal numero e dalla metrica PageRank di tutte le pagine che la collegano (archi entranti). Una pagina a cui sono collegate molte pagine con un PageRank elevato riceve un livello elevato.
-\subsection{Storia}
+\subsubsection{Storia}
 Larry Page e Sergey Brin, i due co-fondatori di Google, svilupparono l'algoritmo PageRank nel 1996 come parte di un progetto di ricerca dell'università di Standford riguardo un nuovo tipo di motore di ricerca. Fu proprio di Sergey Brin l'idea che il World Wide Web dovesse essere ordinato per popolarità data dai link: più una pagina esiste come link nelle altre pagine, più questa deve avere un punteggio alto in classifica.
 
-\subsection{Formulazione}
+\subsubsection{Formulazione}
 Sia $ V = \{ 1, 2, 3, \ldots \} $ un insieme di nodi.
 \pagebreak
 \subsection{Tecnica}
@@ -274,16 +189,19 @@ La tecnica consiste nel calcolo del PageRank dei nodi utilizzando, come pesi deg
 \par
 Il procedimento illustrato si compone dei seguenti passi:
 \begin{algorithm}
-Definizione della matrice dei pesi p(i, j)\;
+  \SetKwData{Left}{left}\SetKwData{This}{this}\SetKwData{Up}{up}
+\SetKwFunction{Union}{Union}\SetKwFunction{FindCompress}{FindCompress}
+\SetKwInOut{Input}{input}\SetKwInOut{Output}{output}
+\Input{Definizione della matrice dei pesi p(i, j)}
 \For{$i \leftarrow $ } {
   Calcolo del pagerank $P_{i}$ con pesi p\;
 }
 Calcolo della matrice dei pesi modificati 
 $pmod_{ij} = p_{ij} \dot (1 - c(i, j))$\;
-\For{$i \leftarrow $ } {
+\For{$i \leftarrow V $  } {
   Calcolo del pagerank $\pagerankModificato_{i}$ con pesi $\pesiPagerankModificato$\;
 }
-\For{$i \leftarrow $ } {
+\For{$i \leftarrow V $ } {
   Calcolo dello score $s_i = log_{10}(\pagerankModificato_{i}) - log(P_{i})$
 }
 \end{algorithm}
@@ -403,26 +321,123 @@ $pmod_{ij} = p_{ij} \dot (1 - c(i, j))$\;
 \end{enumerate}
 
 \section{L'implementazione}
+\subsection{Formato dei dati}
+Per poter effettuare lo studio era necessario lavorare su dati reali. Una stima della qualità degli autori di testi scientifici con la pretesa di essere più efficace a stimare la effettiva rilevanza, deve essere valorata da dati reali, possibilmente in numero sufficiente affinché siano considerabili statisticamente rilevanti.
+\par
+In un primo momento si è pensato di utilizzare, come fonte da cui ricavare i dati, un servizio on-line di consultazione degli articoli come Scopus. \\ 
+La maniera di ottenere i dati sarebbe dovuta essere incrementale.
+Per incrementale si intende il non costuire l'intero dataset a priori dell'analisi dei nodi del grafo, bensì costruire il sotto-grafo "centrato" rispetto ad un autore.
+Quindi, scegliendo un autore, si analizzano i suoi articoli, le referenze di tali articoli, ed infine dagli autori delle referenze è possibile stabilire un collegamento tra i due autori. \\
+L'approccio descritto possiede almeno due aspetti negativi non trascurabili,
+La procedura ha una complessità elevata e richiede una ripetutamente l'interrogazione di un servizio online, quale Scopus, che vieta espressamente le pratiche di Data Mining attraverso l'utilizzo delle loro API. \\
+Dunque si è cercata una strada differente che permettesse di analizzare localmente una grande quantità di dati. \\
+Come scelta definitiva si è utilizzato un dataset ospitato dal sito aminer.org. \\
+Tale sito si prefige l'obiettivo di riunire i dati di quanti più articoli possibili, relativamente a pubblicazioni del macro-ambito della computer science.
+aminer.org aggiorna ogni anno il suo dataset, rilasciandone una nuova versione. Nella versione 10 (la versione di cui si fa riferimento in questo lavoro) possiede un numero di poco superiore ai 3 milioni di articoli. \\
+\begin{figure}[H]
+  \includegraphics[width=\linewidth]{images/aminer.jpg}
+  \caption{Il sito web dell'organizzazione aminer.org}
+\end{figure}
+
+Il dataset presenta i dati nel formato JSON. Contiene un diverso oggetto JSON per ogni articolo. Gli oggetti sono disposti nel file suddivisi per riga.
+Per ogni articolo sono presenti i seguenti campi: \\
+\begin{tabularx}{\textwidth}{| X | X | X | X |}
+\hline \textbf{Nome Campo} & \textbf{Tipo Campo} & \textbf{Descrizione} & \textbf{Esempio} \\
+\hline id & stringa & id della pubblicazione & ``013ea675-bb58-42f8-a423-f5534546b2b1''\\
+\hline title & stringa & titolo della pubblicazione & ``Dynamic analysis of a pest-epidemic model with impulsive control'' \\
+\hline authors & lista di stringhe & autori della pubblicazione & [``Leon A. Sakkal'', ``Kyle Z. Rajkowski'', ``Roger S. Armen'']\\
+\hline venue & stringa & sede di pubblicazione & ``Neural Networks'' \\
+\hline year & intero & anno di pubblicazione & 1994 \\
+\hline n\_citation & intero & sede di pubblicazione & 24 \\
+\hline references & stringa & lista delle citazioni & [``013ea675-bb58-42f8-a423-f5534546b2b1'', ``c043e258-256f-4957-8ac5-899905eb4efd'']\\
+\hline abstract & stringa & sommario & ``In this work we propose schemes for joint modelorder and step-size adaptation of reduced-rank adaptive filters \ldots''\\
+\hline
+\end{tabularx}
+
+Di seguito si mostra un esempio di oggetto JSON del dataset rappresentante un articolo:
+\begin{lstlisting}[keepspaces=true]
+{
+  "authors": [
+    "Leon A. Sakkal",
+    "Kyle Z. Rajkowski",
+    "Roger S. Armen"
+  ],
+  "n_citation": 0,
+  "references": [
+    "4f4f200c-0764-4fef-9718-b8bccf303dba",
+    "aa699fbf-fabe-40e4-bd68-46eaf333f7b1"
+  ],
+  "title":
+      "Prediction of consensus binding mode geometries
+      for related chemical series of positive allosteric
+      modulators of adenosine and muscarinic acetylcholine
+      receptors",
+  "venue": "Journal of Computational Chemistry",
+  "year": 2017,
+  "id": "013ea675-bb58-42f8-a423-f5534546b2b1"
+}
+\end{lstlisting}
+\subsection{Il preprocessing dei dati}
+Il formato JSON, sebbene pratico ed efficace per lo sviluppo, ad esempio, di API di servizi online e per la memorizzazione di dati senza una precisa strutturizzazione, non si presta ad elaborazione di grandi quantità di dati. Questo per almeno due motivi:
+\begin{enumerate}
+  \item Spreca molti dati per la memorizzazione dei caratteri di controllo (inizio/fine di un oggetto o di una lista, virgolette di apertura/chiusura delle stringhe). Inoltre aggiunge le stringhe contenenti i nomi dei campi per ogni oggetto, anche se gli oggetti si riferiscono ad uno stesso schema.
+  \item L'interpretazione di un oggetto non è un'operazione banale come può essere quella di distinguere i campi di un file csv (comma separated values). La struttura ricorsiva del JSON richiede della computazione che per dataset di dimensione di diversi Gigabyte può diventare un overhead rilevante.
+\end{enumerate}
+
+Per ovviare a tali problemi si è deciso di agire con un primo preprocessing. Si sono filtrati i soli dati rilevanti agli scopi del lavoro in oggetto. In particolare, per ogni articolo, si sono mantenute le sole informazioni dell'id dell'articolo, la lista degli autori e la lista delle referenze. Si è sostituito, inoltre, il dispendioso formato JSON con un formato CSV leggermente modificato per poter distinguere le liste degli autori e delle referenze.
+\par
+Il formato scelto per la memorizzazione si presenta così:
+\begin{lstlisting}[keepspaces=true]
+id_articolo,ref_1;ref_2,autore_1;autore_2;autore_2
+\end{lstlisting}
+Si è memorizzato un articolo per ogni riga. In questo modo è possibile utilizzare il carattere fine-linea per distinguere gli articoli tra loro.
+Separando le stringhe utilizzando come separatore la virgola si ottengono dunque tre stringhe contenenti:
+\begin{itemize}
+  \item l'id
+  \item la lista degli id delle referenze
+  \item la lista dei nomi degli autori
+\end{itemize}
+Le due liste suddette si possono ora separare utilizzando come separatore il punto e virgola, ottenendo infine gli autori e gli articoli referenziati distinti.
+
+A questo punto l'esempio di oggetto articolo si riduce a:
+\begin{lstlisting}
+013ea675-bb58-42f8-a423-f5534546b2b1,
+4f4f200c-0764-4fef-9718-b8bccf303dba;
+aa699fbf-fabe-40e4-bd68-46eaf333f7b1,
+Leon A. Sakkal,Kyle Z. Rajkowski,Roger S. Armen
+\end{lstlisting}
+
+Non essendo interessante al fine di quantificare il numero di citazioni, gli id degli articoli sono stati sostituiti da degli identificativi numerici. Questo sia per comprimere i dati senza perdere le informazioni utili, sia per velocizzare il successivo trasporto degli articoli su una struttura dati array.
+In seguito alla traformazione le righe si presentano così:
+\begin{lstlisting}
+123,425;2345,Leon A. Sakkal,Kyle Z. Rajkowski,
+Roger S. Armen
+\end{lstlisting}
+A partire da tale preprocessing si è passati alla importazione e alla creazione degli effettivi grafi delle citazioni e delle collaborazioni.
+
+
 Per l'implementazione finale è stata fatta la scelta di avere un'implementazione custom dell'algoritmo PageRank e dei suoi derivati. \\
 Tale scelta è stata dettata dal fatto che il livello di prestazioni ottenibili utilizzando le basi di dati a grafo non erano ragionevoli per eseguire il lavoro sulla mole di dati a disposizione.
 \subsection{Il linguaggio Scala}
-L'implementazione è stata svolta nel linguaggio di programmazione Scala. \\
+L'implementazione è stata svolta nel linguaggio di programmazione Scala \cite{scalalang}. \\
 Il linguaggio Scala, linguaggio staticamente tipato basato sulla Java Virtual Machine, offre, oltre ad una sintassi espressiva e conveniente, strutture dati che rendono semplice il calcolo parallelo; calcolo parallelo molto utile per ridurre notevolmente i tempi di calcolo nelle macchine multicore.
 \subsection{La generazione del grafo}
 Per la generazione del grafo a partire dalla versione filtrata e compattata del dataset si è utilizzato un metodo multi-fase.
 \begin{enumerate}
   \item In primo luogo è stato necessario ottenere gli autori distinti e ordinati. L'ordinamento è necessario per l'utilizzo dell'algoritmo di ricerca binaria. Per ottenere gli autori distinti e ordinati si è, in un primo momento, utilizzata una struttura dati TreeSet, struttura dati che naturalmente mantiene l'ordinamento degli oggetti. Una volta inserite le stringhe contenenti i nomi degli autori nel TreeSet è sufficiente, infatti, convertire l'insieme in un array per ottenere la lista ordinata. In un secondo momento si è optato per una soluzione più efficiente. Costruendo prima un ArrayBuilder (struttura dati che mantiene un array dinamicamente crescente per la costruzione degli array), calcolando gli elementi distinti ed infine applicando l'algoritmo quickSort per ordinare l'array. Questa ottimizzazione ottiene un miglioramento delle performance di quasi un ordine di grandezza.
   \begin{lstlisting}[keepspaces=true]
-def authorsArray(file: Array[Line], numLines: Int):
+def authorsArray(file: Array[Line],
+                 numLines: Int):
     Array[String] = {
-  def builder(): mutable.ArrayBuilder[String] = {
-    val res = mutable.ArrayBuilder.make[String]()
-      cfor(0)(_ < numLines, _ + 1) { i =>
-        val line = file(i)
-        for (author <- line.authors) {
-          res += author
-        }
+  def builder() = {
+    val res =
+      mutable.ArrayBuilder.make[String]()
+    cfor(0)(_ < numLines, _ + 1) { i =>
+      val line = file(i)
+      for (author <- line.authors) {
+        res += author
       }
+    }
     res
   }
   val authors = builder().result.distinct
@@ -432,16 +447,22 @@ def authorsArray(file: Array[Line], numLines: Int):
   \end{lstlisting}
   \item Una volta ottenuti gli autori distinti il passo successivo è stato quello di creare una struttura dati per mantenere le informazioni sulle relazioni. Si tratta di una matrice rappresentata come matrice sparsa. La rappresentazione come matrice sparsa è utile perché, per ogni autore, il numero di collaborazioni e di citazioni è piuttosto basso. Il costo quadratico di una rappresentazione matriciale sarebbe stato inutile e computazionalmente costosissimo. La struttura dati usata è stata, dunque, un Array di ArrayBuffer di Array di interi. Il primo array contiene alla posizione $i$-esima la lista delle citazioni ricevute, all'interno di un ArrayBuffer, struttura dati del linguaggio Scala rappresentante un array di dimensione variabile. Tale lista contiene degli Array di interi di dimensione fissa contenenti la posizione dell'autore citante nella matrice, e la lista delle statistiche (numero di coautori, numero di citazioni, numero di citazioni ad articoli scritti come da coautori, ecc.).
   \begin{lstlisting}[keepspaces=true]
-val relazioni: Array[mutable.ArrayBuffer[Array[Int]]] = Array.fill(authors.length)(mutable.ArrayBuffer.empty)
+val relazioni: 
+  Array[mutable.ArrayBuffer[Array[Int]]] = 
+  Array.fill(authors.length)
+            (mutable.ArrayBuffer.empty)
 
-var autoriArticolo = new Array[Array[Int]](numArticoli)
+var autoriArticolo =
+  new Array[Array[Int]](numArticoli)
 cfor(0)(_ < numLines, _ + 1) { index =>
   val line = file(index)
   for (ref <- line.references)
     if (autoriArticolo(ref) == null)
       autoriArticolo(ref) = Array.empty
   val authsIdx: Array[Int] =
-    line.authors.map(a => binarySearch(authors, a))
+    line.authors.map(a =>
+      binarySearch(authors, a)
+    )
   autoriArticolo(line.id) = authsIdx
 }
   \end{lstlisting}
@@ -457,14 +478,19 @@ cfor(0)(_ < numLines, _ + 1) { index =>
   \begin{lstlisting}[keepspaces=true]
 cfor(0)(_ < numLines, _ + 1) { index =>
   val line = file(index)
-  for (ref <- line.references; citer <- autoriArticolo(line.id);
-        cited <- autoriArticolo(ref)) {
+  for (ref <- line.references; 
+      citer <- autoriArticolo(line.id);
+      cited <- autoriArticolo(ref)) {
     val tipo =
       if (cited != citer) {
-        val isCitaComeCoautoreA = autoriArticolo(ref).contains(citer)
-        val isCitaComeCoautoreB = autoriArticolo(line.id).contains(cited)
+        val isCitaComeCoautoreA = 
+          autoriArticolo(ref).contains(citer)
+        val isCitaComeCoautoreB = 
+          autoriArticolo(line.id)
+            .contains(cited)
 
-        if (isCitaComeCoautoreA && isCitaComeCoautoreB)
+        if (isCitaComeCoautoreA &&
+            isCitaComeCoautoreB)
           CitaComeCoautoreAAndB
         else if (isCitaComeCoautoreA)
           CitaComeCoautoreA
@@ -474,14 +500,16 @@ cfor(0)(_ < numLines, _ + 1) { index =>
           Cita
       } else Cita
 
-    incrementValueIn(relazioni(citer), cited, tipo)
+    incrementValueIn(relazioni(citer), 
+                     cited,
+                     tipo)
   }
 }  
 \end{lstlisting}
 Una volta generato il grafo con tutte le informazioni necessarie è stato esportato in un formato testuale come lista di archi per essere processato dall'algoritmo di PageRank.
 Il formato utilizzato è stato una lista di numeri separati da spazi secondo tale convenzione:
 \begin{lstlisting}[keepspaces=true]
-autoreCitante autoreCitato statistica1 statistica2 ...
+autoreCitante autoreCitato statistica1 ...
 \end{lstlisting}
 Questo file sarà importato dal programma di PageRank ad ogni test.
 \end{enumerate}
@@ -515,9 +543,12 @@ for (lines <- filesLines.par; line <- lines) {
     (st(3).toShort + st(5).toShort).toShort
   locks(citato).synchronized {
     if (citatiCreazione(citato) == null) {
-      citatiCreazione(citato) = mutable.ArrayBuilder.make[Int]
-      citazioniCreazione(citato) = mutable.ArrayBuilder.make[Short]
-      coautoriCreazione(citato) = mutable.ArrayBuilder.make[Short]
+      citatiCreazione(citato) =
+        mutable.ArrayBuilder.make[Int]
+      citazioniCreazione(citato) = 
+        mutable.ArrayBuilder.make[Short]
+      coautoriCreazione(citato) =
+        mutable.ArrayBuilder.make[Short]
     }
     citatiCreazione(citato) += citante
     coautoriCreazione(citato) += coautori
@@ -535,8 +566,10 @@ L'algoritmo utilizza una struttura dati parziale che serve alla normalizzazione.
 def pageRank(citati: Matrice[Int],
               pesiPageRank: Matrice[Double],
               iterations: Int,
-              dampingFactor: Double = 0.85): Array[Double] = {
-  val sommaPesiUscenti = Array.fill[Double](citati.length)(0.0)
+              dampingFactor: Double = 0.85):
+                Array[Double] = {
+  val sommaPesiUscenti =
+    Array.fill[Double](citati.length)(0.0)
 
   cfor(0)(_ < citati.length, _ + 1) { i =>
     if (citati(i) != null) {
@@ -544,7 +577,8 @@ def pageRank(citati: Matrice[Int],
       val cILength = cI.length
       cfor(0)(_ < cILength, _ + 1) { j =>
         val citante = cI(j)
-        sommaPesiUscenti(citante) += pesiPageRank(i)(j)
+        sommaPesiUscenti(citante) +=
+          pesiPageRank(i)(j)
       }
     }
   }
@@ -563,16 +597,19 @@ def pageRankImpl(citati: Matrice[Int],
                  pesiPageRank: Matrice[Double],
                  iterations: Int,
                  dampingFactor: Double = 0.85,
-                 sommaPesiUscenti: Array[Double]):Array[Double] = {
+                 sommaPesiUscenti: Array[Double]):
+                   Array[Double] = {
 
   val pageRanksPrevIteration: Array[Double] =
     Array.fill(citati.length)(1.0 / citati.length)
   val pageRanks: Array[Double] =
     Array.fill(citati.length)(0.0)
-  val damp: Double = (1.0 - dampingFactor) / citati.length
+  val damp: Double = 
+    (1.0 - dampingFactor) / citati.length
 
   cfor(0)(_ < iterations, _ + 1) { iteration =>
-    for (i <- citati.indices.par; if citati(i) != null) {
+    for (i <- citati.indices.par;
+        if citati(i) != null) {
       var pageRankI: Double = 0.0
       val cI = citati(i)
       val cILength = cI.length
@@ -582,9 +619,12 @@ def pageRankImpl(citati: Matrice[Int],
         val somma = sommaPesiUscenti(citante)
         val pesoNormalizzato: Double =
           if (somma == 0.0) 0.0 else prI(j) / somma
-        pageRankI += pageRanksPrevIteration(citante) * pesoNormalizzato
+        pageRankI += 
+          pageRanksPrevIteration(citante) *
+            pesoNormalizzato
       }
-      pageRanks(i) = damp + dampingFactor * pageRankI
+      pageRanks(i) = 
+        damp + dampingFactor * pageRankI
     }
     cfor(0)(_ < pageRanks.length, _ + 1) { i =>
       pageRanksPrevIteration(i) = pageRanks(i)
@@ -615,14 +655,16 @@ def pageRankMod(citati: Matrice[Int],
 Poi calcola la somma delle citazioni uscenti da ogni nodo (necessarie per la normalizzazione):
 \begin{lstlisting}
   val numAutori = citati.length
-  val sommaCitazioniDate = new Array[PesiType](numAutori)
+  val sommaCitazioniDate = 
+    new Array[PesiType](numAutori)
 
   cfor(0)(_ < numAutori, _ + 1) { i =>
     if (citati(i) != null) {
       cfor(0)(_ < citati(i).length, _ + 1) { j =>
         val citante = citati(i)(j)
         sommaCitazioniDate(citante) =
-          (sommaCitazioniDate(citante) + citazioni(i)(j)).toShort
+          (sommaCitazioniDate(citante) + 
+            citazioni(i)(j)).toShort
       }
     }
   }
@@ -631,17 +673,20 @@ Tali somme sono usate nella normalizzazione delle citazioni uscenti ed entranti 
 \begin{lstlisting}  
   val citazioniDateNormalizzate: Matrice[Double] =
     new Matrice[Double](numAutori)
-  val citazioniRicevuteNormalizzate: Matrice[Double] =
+  val citazioniRicevuteNormalizzate:
+      Matrice[Double] =
     new Matrice[Double](numAutori)
   val coautoriNormalizzati: Matrice[Double] =
     new Matrice[Double](numAutori)
 
   for (i <- citati.indices.par) {
     if (citati(i) != null) {
-      citazioniDateNormalizzate(i) = Array.fill[Double](citati(i).length)(0.0)
+      citazioniDateNormalizzate(i) =
+        Array.fill[Double](citati(i).length)(0.0)
       citazioniRicevuteNormalizzate(i) =
         Array.fill[Double](citati(i).length)(0.0)
-      coautoriNormalizzati(i) = Array.fill[Double](citati(i).length)(0.0)
+      coautoriNormalizzati(i) =
+        Array.fill[Double](citati(i).length)(0.0)
 
       val cI = citati(i)
       val cILength = cI.length
@@ -663,7 +708,8 @@ Tali somme sono usate nella normalizzazione delle citazioni uscenti ed entranti 
               def met: Double = {
                 cfor(0)(_ < ci.length, _ + 1) { k =>
                   if (ci(k) == i) {
-                    return citazioni(citante)(k).toDouble / n
+                    return citazioni(citante)(k)
+                        .toDouble / n
                   }
                 }
                 0.0
@@ -677,7 +723,10 @@ Stessa cosa avviene per la normalizzazione del numero di collaborazioni. Il nume
 \begin{lstlisting} 
         coautoriNormalizzati(i)(j) = {
           val n = sommaCoautori(i)
-          if (n == 0.toShort) 0.0 else coautori(i)(j).toDouble / n
+          if (n == 0.toShort) 
+            0.0 
+          else 
+            coautori(i)(j).toDouble / n
         }
       }
     }
@@ -686,24 +735,59 @@ Stessa cosa avviene per la normalizzazione del numero di collaborazioni. Il nume
 Calcolati tutti i parametri normalizzati si procede al calcolo degli effettivi pesi da dare in pasto all'algoritmo pageRank:
 \begin{lstlisting}
   val pesiPageRank = new Matrice[Double](numAutori)
-  for (i <- citati.indices.par; if citati(i) != null) {
-    pesiPageRank(i) = Array.fill[Double](citati(i).length)(0.0)
+  for (i <- citati.indices.par; 
+    if citati(i) != null) {
+      pesiPageRank(i) = 
+        Array.fill[Double](citati(i).length)(0.0)
 
     val cI = citati(i)
     val cILength = cI.length
     cfor(0)(_ < cILength, _ + 1) { j =>
-      pesiPageRank(i)(j) = citazioniRicevuteNormalizzate(i)(j) * (1 - (coautoriNormalizzati(i)(j) + citazioniDateNormalizzate(
-        i)(j)) / 2.0 )
+      pesiPageRank(i)(j) =
+        citazioniRicevuteNormalizzate(i)(j) * 
+          (1 - 
+            (coautoriNormalizzati(i)(j) +
+            citazioniDateNormalizzate(i)(j)) / 2.0 )
     }
   }
 \end{lstlisting}
 Infine si procede chiamando la funzione pageRank con l'implementazione classica:
 \begin{lstlisting}
-  pageRank(citati, pesiPageRank, iterazioni, dampingFactor)
+  pageRank(citati,
+           pesiPageRank,
+           iterazioni,
+           dampingFactor)
 }
 \end{lstlisting}
 
 \section{Analisi dei dati}
 Utilizzando gli algoritmi descritti negli scorsi capitoli si sono svolte le analisi dei dati sperimentali.
 
+In primo luogo si sono messe in relazione le due misure del PageRank. Il risultato atteso è quello di avere due misure che variassero di poco. Questo perché il PageRank proposto non è che una variazione del PageRank classico. Quindi non ci si aspetta che un autore con un PageRank alto abbia un PageRank modificato drasticamente diverso.
+\begin{figure}[H]
+  \includegraphics[width=\linewidth]{images/grafico-1.png}
+  \caption{Scatter plot dei due PageRank messi in relazione}
+\end{figure}
+\subsection{Rappresentazioni dello score}
+Guardando il grafico precedentemente, che mostra come lo scostamento delle due varianti del PageRank sia molto basso, ci si aspetta che la loro differenza si discosti poco dallo zero. Anche per questo motivo si è scelto l'utilizzo della differenza logaritmica come funzione di scoring. Si mostra, dunque, la relazione tra valori di PageRank crescenti e lo score relativo.
+\begin{figure}[H]
+  \includegraphics[width=\linewidth]{images/grafico-2.png}
+  \caption{Scatter plot dei due PageRank messi in relazione}
+\end{figure}
+Si può apprezzare meglio come si distribuisce lo score visualizzando i PageRank crescenti su scala logaritmica:
+\begin{figure}[H]
+  \includegraphics[width=\linewidth]{images/grafico-3.png}
+  \caption{Scatter plot dei due PageRank messi in relazione}
+\end{figure}
+Il valore del PageRank, pur non essendo linearmente proporzionale al numero di archi entranti (sappiamo che viene calcolato in base al PageRank dei nodi da cui provengono i suoi archi entranti), è strettamente legato al numeo di archi entranti.
+\par Vediamo come varia lo score rispetto al numero totale di citazioni di ogni autore:
+\begin{figure}[H]
+  \includegraphics[width=\linewidth]{images/grafico-3.png}
+  \caption{Scatter plot dei due PageRank messi in relazione}
+\end{figure}
+
+\medskip
+ 
+\bibliographystyle{unsrt}
+\bibliography{tesi}
 \end{document}
