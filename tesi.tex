@@ -47,7 +47,7 @@ I database bibliografici online, come DBLP in informatica e PubMed in scienze me
 \subsubsection{Bibliometria e bibliomining}
 Nata ben prima del data mining è la bibliometria. La bibliometria, in senso lato, è un'analisi statistica di pubblicazioni scritte, come libri o articoli. I metodi bibliometrici sono frequentemente usati nel campo della biblioteconomia e della scienza dell'informazione. La bibliometria viene utilizzata per fornire un'analisi quantitativa della letteratura scientifica o per valutare la spesa di bilancio. L' analisi delle citazioni è un metodo bibliometrico comunemente usato che si basa sulla costruzione del grafico delle citazioni, una rappresentazione di rete o grafico delle citazioni tra documenti. Molti campi di ricerca utilizzano metodi bibliometrici per esplorare l'impatto del loro campo, l'impatto di una serie di ricercatori, l'impatto di un particolare articolo o per identificare documenti particolarmente di impatto all'interno di uno specifico campo di ricerca.
 \par
-Il bibliomining è l'uso di una combinazione di data mining e bibliometria allo scopo di analizzare i servizi di libreria. Il termine è stato creato nel 2003 da Scott Nicholson, Assistant Professor della Syracuse University School of Information Studies, al fine di distinguere il data mining bibliografico da altri tipi di data mining.
+Il bibliomining \cite{NICHOLSON2006785} è l'uso di una combinazione di data mining e bibliometria allo scopo di analizzare i servizi di libreria. Il termine è stato creato nel 2003 da Scott Nicholson, Assistant Professor della Syracuse University School of Information Studies, al fine di distinguere il data mining bibliografico da altri tipi di data mining.
 \subsubsection{Reti di citazioni}
 Una delle pratiche di mining bibliografico più diffuse è quella di analisi delle reti di citazioni. \\
 Una rete di citazione è un grafo orientato in cui i nodi sono rappresentati da articoli (o autori di articoli) e gli archi sono costituiti dalle citazioni presenti tra gli articoli. Nel caso del grafo degli articoli la relazione di citazione rappresenta un arco non pesato in cui sono possibili due soli stati per l'arco: citazione presente e citazione non presente.
@@ -68,8 +68,6 @@ Le basi di dati di grafi ricadono nella categoria delle basi di dati NoSQL, ovve
 \par
 Il classico linguaggio SQL, sebbene abbia potenza sufficiente a rappresentare la maggior parte delle interrogazioni sui grafi, non essendo stato pensato per tale utilizzo, risulta in interrogazioni eccessivamente complicate e prone ad errori. Per ovviare alle difficoltà di utilizzo di SQL nel dominio dei grafi i graph database sono dotate di linguaggi di interrogazione specializzati per rappresentare i nodi e gli archi dei grafi.
 
-\subsubsection{I principali Graph DBMS}
-
 \subsubsection{Il Graph DBMS Neo4J}
 \begin{figure}[H]
   \includegraphics[width=\linewidth]{images/neo4j.png}
@@ -85,7 +83,7 @@ I nodi del grafo sono rappresentati, nelle query Cypher, da un nome racchiuso tr
 MATCH (a) seleziona tutti i nodi del grafo, che vengono rappresentati nella query dal nome "a". Sono selezionati tutti i nodi del grafo perché non sono presenti vincoli.
 MATCH (a: Author) seleziona, invece, i nodi che hanno come tipo Author. I tipi non vanno dichiarati precedentemente all'uso, ma lo schema è generato dinamicamente. Il tipo Author farà parte del database quando sarà creato il primo nodo di tale tipo.
 E' possibile filtrare ulteriormente utilizzando vincoli sui campi che possiede un dato nodo:
-MATCH (a: Author {name: "Giuseppe Rossi"}) seleziona tutti i nodi di tipo Author per cui esista un campo denominato "name" il cui valore sia la stringa "Giuseppe Rossi". Data l'assenza di una fase separata per la definizione dello schema della base di dati, nulla vieta di avere nodi di tipi diversi che abbiano campi con nomi e tipi diversi. Tuttavia, questa diversificazione può essere deleteria ad una buona gestione di una base di dati. A tal proposito Neo4j permette la definizione di vincoli che permettano, oltre che a mantenere dati i coerenti, a rendere efficienti le interrogazioni attraverso l'utilizzo di indici.
+MATCH (a: Author {name: "Giuseppe Rossi"}) seleziona tutti i nodi di tipo Author per cui esista un campo denominato ``name'' il cui valore sia la stringa "Giuseppe Rossi". Data l'assenza di una fase separata per la definizione dello schema della base di dati, nulla vieta di avere nodi di tipi diversi che abbiano campi con nomi e tipi diversi. Tuttavia, questa diversificazione può essere deleteria ad una buona gestione di una base di dati. A tal proposito Neo4j permette la definizione di vincoli che permettano, oltre che a mantenere dati i coerenti, a rendere efficienti le interrogazioni attraverso l'utilizzo di indici.
 Un vincolo utile per l'ottimizzazione delle query è quello di unicità. E' possibile aggiungere il vincolo di unicità attraverso una query Cypher:
 \begin{lstlisting}[keepspaces=true]
   CREATE CONSTRAINT ON (book:Book)
@@ -169,9 +167,9 @@ Dato un insieme di Nodi $V$ e un insieme di archi orientati pesati $E$ si defini
 \subsubsection{Grafo multipeso}
 Dato un insieme di Nodi $V$ e un insieme di archi orientati pesati $E$ si definisce $G^m = (V,E^m)$ il grafo delle citazioni arricchito. Tale grafo associa agli archi una famiglia di pesi $p^m_e\in\mathbb{N}$ tale che per ogni coppia di nodi $v_i, v_j \in V$ e per ogni statistica $s_k$ con $k \in \{0,1..w \}$, $p^m_{ijk}$ corrisponde alla statistica $k$-esima del nodo $v_i$ incidente sul nodo $v_j$.
 
-\subsection{L'algoritmo PageRank}
+\subsubsection{L'algoritmo PageRank}
 PageRank \cite{Page98thepagerank} è un algoritmo introdotto da Google per classificare le pagine web. 
-Nasce dalla necessità del motore di ricerca di avere un ordinamento delle pagine web rispetto alla loro importanza. Esso funziona contando il numero di link delle pagine web per avere una stima approssimativa della qualità e dell'importanza di un sito web. L'assunzione su cui questo si basa è quella che, tantopiù una pagina è importante, più tende a ricevere collegamenti dalle altre pagine.
+Nasce dalla necessità del motore di ricerca di avere un ordinamento delle pagine web rispetto alla loro importanza. Esso funziona contando il numero di link delle pagine web per avere una stima approssimativa della qualità e dell'importanza di un sito web. L'assunzione su cui questo si basa è quella che, tanto più una pagina è importante, più tende a ricevere collegamenti dalle altre pagine.
 \begin{figure}[H]
   \includegraphics[width=\linewidth]{images/pagerank.jpg}
   \caption{Rappresentazione grafica del ranking con PageRank}
@@ -180,10 +178,22 @@ Dal punto di vista matematico il PageRank di una pagina è definito in modo rico
 \subsubsection{Storia}
 Larry Page e Sergey Brin, i due co-fondatori di Google, svilupparono l'algoritmo PageRank nel 1996 come parte di un progetto di ricerca dell'università di Standford riguardo un nuovo tipo di motore di ricerca. Fu proprio di Sergey Brin l'idea che il World Wide Web dovesse essere ordinato per popolarità data dai link: più una pagina esiste come link nelle altre pagine, più questa deve avere un punteggio alto in classifica.
 
-\subsubsection{Formulazione}
-Sia $ V = \{ 1, 2, 3, \ldots \} $ un insieme di nodi.
-\pagebreak
-\subsection{Tecnica}
+\subsubsection{Formulazione dell'algoritmo PageRank}
+Sia $G = (V, E)$ un grafo pesato e orientato. Si definisce PageRank: $P \in \mathbb{R}^n$ con $n$ pari al numero di nodi del grafo tale che:
+
+\begin{equation*}
+  P_k(i) = 
+    \begin{cases} 
+      \displaystyle \frac{1}{n} & k = 1 \\
+      \displaystyle \frac
+        {\displaystyle \sum_{j=1}^{n} p_{ji}}
+        {\displaystyle \sum_{\altroindice=1}^{n} {\sum_{j=1}^{n} p_{j\altroindice}}}
+        P_{k-1}(j) & k > 1 
+
+    \end{cases} 
+\end{equation*}
+
+\subsection{Esposizione della tecnica}
 Si propone di seguito la tecnica proposta il calcolo dello score per la classificazione degli autori. \\
 La tecnica consiste nel calcolo del PageRank dei nodi utilizzando, come pesi degli archi, il numero di citazioni prima e lo stesso numero di citazioni moltiplicato per un coefficiente peggiorativo. Una volta ottenuti questi due punteggi, la loro combinazione attraverso una funzione permette di ottenere il risultato finale.
 \par
@@ -192,17 +202,18 @@ Il procedimento illustrato si compone dei seguenti passi:
   \SetKwData{Left}{left}\SetKwData{This}{this}\SetKwData{Up}{up}
 \SetKwFunction{Union}{Union}\SetKwFunction{FindCompress}{FindCompress}
 \SetKwInOut{Input}{input}\SetKwInOut{Output}{output}
-\Input{Definizione della matrice dei pesi p(i, j)}
-\For{$i \leftarrow $ } {
+\Input{Matrice dei pesi p con $p_{ij} = \citazioni_{ij}$}
+\Output{Vettore degli score $s$}
+\For{$i$} {
   Calcolo del pagerank $P_{i}$ con pesi p\;
 }
 Calcolo della matrice dei pesi modificati 
 $pmod_{ij} = p_{ij} \dot (1 - c(i, j))$\;
-\For{$i \leftarrow V $  } {
+\For{$i$} {
   Calcolo del pagerank $\pagerankModificato_{i}$ con pesi $\pesiPagerankModificato$\;
 }
-\For{$i \leftarrow V $ } {
-  Calcolo dello score $s_i = log_{10}(\pagerankModificato_{i}) - log(P_{i})$
+\For{$i$} {
+  Calcolo dello score $s_i = log_{10}(\pagerankModificato_{i}) - log_{10}(P_{i})$
 }
 \end{algorithm}
 
@@ -294,7 +305,7 @@ $pmod_{ij} = p_{ij} \dot (1 - c(i, j))$\;
   Nella formula sopra riportata si può notare come si effettuino due diverse normalizzazioni per la parte classica del peso $p_{ij}$ e per la parte che tiene conto dell'indice di collaborazione. \\
   Il numero di citazioni del nodo $j$ al nodo $i$ sono poste in rapporto al numero di citazioni che il nodo $j$ ha rispetto a tutti gli autori. \\
   Diversamente, invece, il numero di citazioni che il nodo $i$ ha nei confronti del nodo $j$ (le citazioni considerate in senso inverso) sono pesate rispetto al numero di articoli, di qualsiasi autore, che il nodo $i$ ha citato. \\
-  Stessa cosa avviene per il numero di collaborazioni. Non siamo interessati al numero di collaborazioni del nodo citante, bensi a quelle del nodo citato.
+  Stessa cosa avviene per il numero di collaborazioni. Non siamo interessati al numero di collaborazioni del nodo citante, bensì a quelle del nodo citato.
   \par
   Queste due diverse stime sono combinate attraverso una combinazione convessa dei coefficienti $\alpha_1$ e $\alpha_2$ i quali, nell'implementazione dell'algoritmo sono stati posti nel caso della media aritmetica e nei due casi limite $\alpha_1 = 0$ e $\alpha_2 = 1$ e viceversa.  
 
@@ -322,17 +333,17 @@ $pmod_{ij} = p_{ij} \dot (1 - c(i, j))$\;
 
 \section{L'implementazione}
 \subsection{Formato dei dati}
-Per poter effettuare lo studio era necessario lavorare su dati reali. Una stima della qualità degli autori di testi scientifici con la pretesa di essere più efficace a stimare la effettiva rilevanza, deve essere valorata da dati reali, possibilmente in numero sufficiente affinché siano considerabili statisticamente rilevanti.
+Per poter effettuare lo studio era necessario lavorare su dati reali. Una stima della qualità degli autori di testi scientifici con la pretesa di essere più efficace a stimare la effettiva rilevanza, deve essere avvalorata da dati reali, possibilmente in numero sufficiente affinché siano considerabili statisticamente rilevanti.
 \par
 In un primo momento si è pensato di utilizzare, come fonte da cui ricavare i dati, un servizio on-line di consultazione degli articoli come Scopus. \\ 
 La maniera di ottenere i dati sarebbe dovuta essere incrementale.
-Per incrementale si intende il non costuire l'intero dataset a priori dell'analisi dei nodi del grafo, bensì costruire il sotto-grafo "centrato" rispetto ad un autore.
+Per incrementale si intende il non costruire l'intero dataset a priori dell'analisi dei nodi del grafo, bensì costruire il sotto-grafo "centrato" rispetto ad un autore.
 Quindi, scegliendo un autore, si analizzano i suoi articoli, le referenze di tali articoli, ed infine dagli autori delle referenze è possibile stabilire un collegamento tra i due autori. \\
 L'approccio descritto possiede almeno due aspetti negativi non trascurabili,
 La procedura ha una complessità elevata e richiede una ripetutamente l'interrogazione di un servizio online, quale Scopus, che vieta espressamente le pratiche di Data Mining attraverso l'utilizzo delle loro API. \\
 Dunque si è cercata una strada differente che permettesse di analizzare localmente una grande quantità di dati. \\
 Come scelta definitiva si è utilizzato un dataset ospitato dal sito aminer.org. \\
-Tale sito si prefige l'obiettivo di riunire i dati di quanti più articoli possibili, relativamente a pubblicazioni del macro-ambito della computer science.
+Tale sito si prefigge l'obiettivo di riunire i dati di quanti più articoli possibili, relativamente a pubblicazioni del macro-ambito della computer science.
 aminer.org aggiorna ogni anno il suo dataset, rilasciandone una nuova versione. Nella versione 10 (la versione di cui si fa riferimento in questo lavoro) possiede un numero di poco superiore ai 3 milioni di articoli. \\
 \begin{figure}[H]
   \includegraphics[width=\linewidth]{images/aminer.jpg}
@@ -378,7 +389,7 @@ Di seguito si mostra un esempio di oggetto JSON del dataset rappresentante un ar
 }
 \end{lstlisting}
 \subsection{Il preprocessing dei dati}
-Il formato JSON, sebbene pratico ed efficace per lo sviluppo, ad esempio, di API di servizi online e per la memorizzazione di dati senza una precisa strutturizzazione, non si presta ad elaborazione di grandi quantità di dati. Questo per almeno due motivi:
+Il formato JSON, sebbene pratico ed efficace per lo sviluppo, ad esempio, di API di servizi online e per la memorizzazione di dati senza una precisa strutturazione, non si presta ad elaborazione di grandi quantità di dati. Questo per almeno due motivi:
 \begin{enumerate}
   \item Spreca molti dati per la memorizzazione dei caratteri di controllo (inizio/fine di un oggetto o di una lista, virgolette di apertura/chiusura delle stringhe). Inoltre aggiunge le stringhe contenenti i nomi dei campi per ogni oggetto, anche se gli oggetti si riferiscono ad uno stesso schema.
   \item L'interpretazione di un oggetto non è un'operazione banale come può essere quella di distinguere i campi di un file csv (comma separated values). La struttura ricorsiva del JSON richiede della computazione che per dataset di dimensione di diversi Gigabyte può diventare un overhead rilevante.
@@ -408,7 +419,7 @@ Leon A. Sakkal,Kyle Z. Rajkowski,Roger S. Armen
 \end{lstlisting}
 
 Non essendo interessante al fine di quantificare il numero di citazioni, gli id degli articoli sono stati sostituiti da degli identificativi numerici. Questo sia per comprimere i dati senza perdere le informazioni utili, sia per velocizzare il successivo trasporto degli articoli su una struttura dati array.
-In seguito alla traformazione le righe si presentano così:
+In seguito alla trasformazione le righe si presentano così:
 \begin{lstlisting}
 123,425;2345,Leon A. Sakkal,Kyle Z. Rajkowski,
 Roger S. Armen
@@ -420,7 +431,7 @@ Per l'implementazione finale è stata fatta la scelta di avere un'implementazion
 Tale scelta è stata dettata dal fatto che il livello di prestazioni ottenibili utilizzando le basi di dati a grafo non erano ragionevoli per eseguire il lavoro sulla mole di dati a disposizione.
 \subsection{Il linguaggio Scala}
 L'implementazione è stata svolta nel linguaggio di programmazione Scala \cite{scalalang}. \\
-Il linguaggio Scala, linguaggio staticamente tipato basato sulla Java Virtual Machine, offre, oltre ad una sintassi espressiva e conveniente, strutture dati che rendono semplice il calcolo parallelo; calcolo parallelo molto utile per ridurre notevolmente i tempi di calcolo nelle macchine multicore.
+Il linguaggio Scala, linguaggio staticamente tipizzato basato sulla Java Virtual Machine, offre, oltre ad una sintassi espressiva e conveniente, strutture dati che rendono semplice il calcolo parallelo; calcolo parallelo molto utile per ridurre notevolmente i tempi di calcolo nelle macchine multicore.
 \subsection{La generazione del grafo}
 Per la generazione del grafo a partire dalla versione filtrata e compattata del dataset si è utilizzato un metodo multi-fase.
 \begin{enumerate}
@@ -468,7 +479,7 @@ cfor(0)(_ < numLines, _ + 1) { index =>
   \end{lstlisting}
   \item Un'altra struttura dati utilizzata è quella che mantiene, per ogni articolo, la lista degli indici dei suoi autori. Per riempire questa seconda matrice è stata utilizzato l'algoritmo di ricerca binaria.
   Per ogni riga del file e per ogni autori di tale articolo si è utilizzata la ricerca binaria per ottenere l'indice di riga a partire dalla stringa del nome.
-  \item Una terza scansione, infine è stata necessaria per riempire la matrice delle relazioni. Scandendo gli articoli, per ogni articolo si sono presi gli autori, e la stessa cosa è stata fatta per gli autori degli articoli citati. A questo punto è stata aggiunta una entry nella lista delle citazioni per gli autori non ancora citati, è stato, invece, incrementato il contatore delle citazioni per gli autori già citati. Per avere, successivamente, la possibilità di una migliore scrematura delle citazioni, sono state suddivise in diverse categorie:
+	  \item Una terza scansione, infine è stata necessaria per riempire la matrice delle relazioni. Scandendo gli articoli, per ogni articolo si sono presi gli autori, e la stessa cosa è stata fatta per gli autori degli articoli citati. A questo punto è stata aggiunta una entry nella lista delle citazioni per gli autori non ancora citati, è stato, invece, incrementato il contatore delle citazioni per gli autori già citati. Per avere, successivamente, la possibilità di una migliore scrematura delle citazioni, sono state suddivise in diverse categorie:
   \begin{enumerate}
     \item citazioni da un autore A ad un autore B in cui non ci sono relazioni tra A e B per quanto riguarda gli articoli in oggetto.
     \item citazioni da un autore A ad un autore B in cui l'autore dell'articolo citante (l'autore A) è anche coautore dell'articolo citato (coautore di B).
@@ -517,7 +528,7 @@ Questo file sarà importato dal programma di PageRank ad ogni test.
 A valle della generazione del grafo (operazione maggiormente onerosa) c'è stata la vera e propria implementazione dell'algoritmo PageRank.
 A differenza della generazione del grafo che è un'operazione svolta una tantum, l'algoritmo di PageRank deve essere eseguito diverse volte con parametri diversi, per valutarne i risultati. Dunque la velocità di esecuzione risulta essere maggiormente importante in questo caso. Per ottenere le performance migliori possibili, oltre ad utilizzare codice ottimizzato utilizzando strutture dati di livello più basso possibile (array) e strutture di controllo imperative a basso livello (while) al posto di paradigmi più eleganti da un punto di vista del codice ma meno performanti, è stato utilizzato il parallelismo per rendere parallele tutte le operazioni più onerose che lavorano su insiemi distinti.
 \subsubsection{Computazione parallela}
-La parallelizzazione del codice è stata enormemente semplificata dalla scelta progettuale di utizzare il linguaggio Scala. Questo possiede un costrutto molto comodo, chiamato ``Parallel Range'' che permette l'iterazione su un range numerico in modo parallelo.
+La parallelizzazione del codice è stata enormemente semplificata dalla scelta progettuale di utilizzare il linguaggio Scala. Questo possiede un costrutto molto comodo, chiamato ``Parallel Range'' \cite{parallel} che permette l'iterazione su un range numerico in modo parallelo.
 Ad esempio, si noti questo codice:
 \begin{lstlisting}[keepspaces=true]
 val a = new Array[Int](1000)
@@ -532,7 +543,7 @@ Una volta creati 3 array da 1000 elementi, per ogni indice $i$ inserisce la somm
 Questo è un esempio di codice parallelizzabile. Infatti il risultato della somma non dipende dai valori degli altri indici diversi da $i$. \\
 Per rendere parallelo il codice è necessario rendere il ``Range'' $0.to(1000)$ un range parallelo chiamando il metodo $par$. Tale metodo suddivide il range in parti uguali in numero eguale al numero dei processori disponibili sulla macchina e manda in esecuzione il blocco di codice a thread diversi.
 \subsubsection{Lettura parallela da file}
-Anche la lettura del file del grafo è stata resa parallela grazie a principio appena esposto. Per evitare la suddivizione del file in lettura è stato fatto un preprocessing del file: attraverso l'utility bash ``split'' si è suddiviso questo per righe in 8 parti uguali (il numero di processori della macchina) e si è fatta una lettura parallela dei files utilizzando il range parallelo precedentemente esposto:
+Anche la lettura del file del grafo è stata resa parallela grazie a principio appena esposto. Per evitare la suddivisione del file in lettura è stato fatto un preprocessing del file: attraverso l'utility bash ``split'' \cite{split} si è suddiviso questo per righe in 8 parti uguali (il numero di processori della macchina) e si è fatta una lettura parallela dei files utilizzando il range parallelo precedentemente esposto:
 \begin{lstlisting}[keepspaces=true]
 for (lines <- filesLines.par; line <- lines) {
   val st = split(line, ' ')
@@ -779,7 +790,7 @@ Si può apprezzare meglio come si distribuisce lo score visualizzando i PageRank
   \includegraphics[width=\linewidth]{images/grafico-3.png}
   \caption{Scatter plot dei due PageRank messi in relazione}
 \end{figure}
-Il valore del PageRank, pur non essendo linearmente proporzionale al numero di archi entranti (sappiamo che viene calcolato in base al PageRank dei nodi da cui provengono i suoi archi entranti), è strettamente legato al numeo di archi entranti.
+Il valore del PageRank, pur non essendo linearmente proporzionale al numero di archi entranti (sappiamo che viene calcolato in base al PageRank dei nodi da cui provengono i suoi archi entranti), è strettamente legato al numero di archi entranti.
 \par Vediamo come varia lo score rispetto al numero totale di citazioni di ogni autore:
 \begin{figure}[H]
   \includegraphics[width=\linewidth]{images/grafico-3.png}
