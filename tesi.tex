@@ -8,6 +8,7 @@
 \usepackage{amsfonts}
 \usepackage[linesnumbered,lined,boxed,commentsnumbered]{algorithm2e}
 \usepackage{float}
+\usepackage{frontespizio}
 \lstset{basicstyle=\ttfamily}
 % interruzione di pagina tra le section
 \let\oldsection\section
@@ -31,17 +32,15 @@
 
 \begin{document}
 
-\maketitle
-\clearpage
 \tableofcontents
 \clearpage
 
 \section{Introduzione}
 Insieme con l'enorme quantità di dati riguardanti le pubblicazioni scientifiche disponibile nei database online, come Dblp nell'ambito dell'informatica e Pubmed in quello delle scienze biomediche, è nata l'idea di utilizzare algoritmi matematici e statistici per ricavare dati utili sulle pubblicazioni e sui loro autori. \\
 Tra i metodi di analisi oggi utilizzati vi è l'algoritmo PageRank. Nato inizialmente per valutare la popolarità delle pagine web, viene utilizzato per stimare la probabilità di un autore di essere citato da altri autori al fine di valutarne la visibilità.
-\par Si propone una tecnica per valutare la visibilità degli autori basata su una modifica dell'algoritmo PageRank, affinché essa sia valutata al di fuori dalla loro rete di collaborazione.
+\par Si propone un algortimo per stimare la visibilità degli autori basato su una modifica dell'algoritmo PageRank, affinché essa sia valutata al di fuori dalla loro rete di collaborazione.
 
-\section{Inserire un titolo...}
+\section{Concetti introduttivi}
 \subsection{Il Mining Bibliografico}
 Il lavoro proposto si inserisce all'interno dell'ambito della branca del data mining che va sotto il nome di mining bibliografico. Tale branca nasce con l'obiettivo di ottenere informazioni statisticamente utili sugli articoli scientifici, sui loro autori, sulle loro collaborazioni a partire dal grande quantitativo di dati presente online. \\
 I database bibliografici online, come DBLP in informatica e PubMed in scienze mediche, contengono abbondanti informazioni sulle pubblicazioni di ricerca in diversi campi. Ciascuno di questi database costituisce una gigantesca rete di informazioni, che collega in modo complesso documenti di ricerca, autori, conferenze, riviste e possibilmente anche informazioni sulle citazioni e fornisce un terreno fertile per l'analisi delle reti di informazioni.
@@ -775,7 +774,7 @@ Infine si procede chiamando la funzione pageRank con l'implementazione classica:
 \section{Analisi dei dati}
 Utilizzando gli algoritmi descritti negli scorsi capitoli si sono svolte le analisi dei dati sperimentali.
 
-In primo luogo si sono messe in relazione le due misure del PageRank. Il risultato atteso è quello di avere due misure per cui fossero pochi i nodi con una variazione consistente. Questo perché il PageRank proposto non è che una variazione del PageRank classico. Non ci si aspetta, quindi, che un autore con un pagerank alto abbia un pagerank modificato drasticamente diverso.
+In primo luogo si sono messe in relazione le due misure del PageRank. Il risultato atteso era quello di avere due misure per cui fossero pochi i nodi con una variazione consistente. Questo perché il PageRank proposto non è che una variazione del PageRank classico, non un suo totale stravolgimento. Non ci si aspetta, quindi, che un autore con un dato punteggio abbia un pagerank modificato drasticamente diverso.
 \begin{figure}[H]
   \includegraphics[width=0.7\linewidth]{images/grafico-1.png}
   \caption{Scatter plot dei due PageRank messi in relazione}
@@ -796,9 +795,8 @@ Il valore del PageRank, pur non essendo linearmente proporzionale al numero di a
 
 \subsection{Considerazioni}
 A partire dai grafici precedentemente esposti si possono fare alcune considerazioni.
-\par
 \subsubsection{Comportamento dello score nei nodi con PageRank elevato}
-Si può notare come i nodi con un grande numero di citazioni tendono ad avere uno score mediamente inferiore allo zero. Ci si aspetta un comportamento simile perché è inverosimile che un grandissimo numero di citazioni possa provenire dalla rete di collaborazione di un nodo. L'algoritmo, quindi, attenuando il punteggio dei nodi in cui le citazioni provenienti dalla rete di collaborazione sono numericamente predominanti sul numero di citazioni totali, cede le quantità prelevate agli altri nodi.
+Si può notare come i nodi con un grande numero di citazioni tendono ad avere uno score mediamente inferiore allo zero. Ci si aspetta un comportamento simile perché è inverosimile che un grandissimo numero di citazioni possa provenire dalla rete di collaborazione di un nodo. L'algoritmo, quindi, attenuando il punteggio dei nodi in cui le citazioni provenienti dalla rete di collaborazione sono numericamente predominanti sul numero di citazioni totali, cede le quantità di pagerank prelevate agli altri nodi.
 \begin{figure}[H]
   \includegraphics[width=0.6\linewidth]{images/grafico-4.png}
   \caption{Tendenza dei nodi con valori di PageRank alti}
@@ -812,24 +810,23 @@ Analizzando alcuni dei nodi outliers si possono fare alcune considerazioni:
 \end{figure}
 \medskip
 \begin{enumerate}
-  \item Considerando i nodi outliers nel semipiano positivo presi tra i nodi aventi numero totale di citazioni alto, è possibile individuare nodi con una rete di collaborazione che offre un contributo rilevante nell'apporto di citazioni: \\
-  preso come esempio il nodo con $\#1$, esso possiede un punteggio PageRank elevato, pari a $1.48$x$10^{-4}$. Il suo score si distingue da quelli con suo stesso ranking e da quelli con suo stesso numero di citazioni totali. Questo perché esso possiede molte citazioni nei confronti di molti dei suoi nodi citanti. Possiede 261 citazioni a molti autori che sono o suoi coautori o che hanno citato suoi articoli.
+  \item Considerando i nodi outliers nel semipiano positivo presi tra i nodi aventi un punteggio pagerank alto, è possibile individuare nodi la cui rete di collaborazione offre un contributo rilevante nell'apporto di citazioni: \\
+  preso come esempio il nodo con $\#1$, esso possiede un punteggio PageRank elevato, pari a $9.89$x$10^{-5}$ e pagerank modificato pari a $6.45$x$10^{-5}$. Il suo score si distingue da quelli con suo stesso ranking e da quelli con PageRank simile. Questo perché esso possiede molte citazioni nei confronti di molti dei suoi nodi citanti. Possiede citazioni a molti autori che sono o suoi coautori o che hanno citato suoi articoli.
   \item Essere collaboratori di un nodo con pagerank alto ha l'effetto, secondo la semantica dell'algoritmo originale, di ottenere un incremento notevole del proprio punteggio.
   Preso in esame il nodo con score (differenza logaritmica) massimo, il nodo $\#2$, si scopre che esso ha un'autocitazione e una citazione da autore con pagerank dell'ordine di $10^{-6}$. Questo fa schizzare il suo PageRank anche nell'ordine di $10^{-6}$. Il PageRank modificato, invece, non considerando le autocitazioni e dando contributo peggiorativo alla citazione del nodo nei confronti del nodo citante, abbassa il suo pagerank nell'ordine di $10^{-8}$, pagerank che avrebbe dovuto avere senza la citazione proveniente dalla sua collaborazione.
-  \item Il peggioramento dello score si espande sui vicini. Per come è strutturato l'algoritmo PageRank, esso si basa sul pagerank dei vicini per valutare il pagerank del nodo in oggetto. Va da sè che se il pagerank dei vicini di un nodo è molto variato per un rilevante numero di citazioni nella rete di collaborazione, anche il pagerank di un nodo che lavora in autonomia viene peggiorato. \\
-  Tuttavia questa condizione si osserva per pochi outliers.
-  \item L'algoritmo non considera negativa la collaborazione di per sè; infatti le citazioni dei coautori sono considerate nel coefficiente peggiorativo solo quando sono numerose in proporzione al numero totale di collaborazione. Una coppia di autori che collabora, le cui citazioni sono solo in piccola parte derivanti tale collaborazione non sono danneggiati nello score.
+  \item Il peggioramento dello score si espande sui vicini. Per come è strutturato l'algoritmo PageRank, esso si basa sul pagerank dei vicini per valutare il pagerank del nodo in oggetto. Va da sè che se il pagerank dei vicini di un nodo è molto variato per un rilevante numero di citazioni nella rete di collaborazione, anche il pagerank di un nodo che lavora in autonomia viene peggiorato. Questa condizione non viola gli obiettivi dell'algoritmo. Se si vuole stimare la visibilità degli autori, la diminuzione di visibilità di un autore deve ripercuotersi sugli autori da egli citati, a prescindere della loro rete di collaborazione. \\
+  Questa condizione, tuttavia, si osserva per pochi outliers.
+  \item L'algoritmo non considera negativa la collaborazione di per sè; le citazioni dei coautori, infatti, sono considerate nel coefficiente peggiorativo, solo quando sono numerose in proporzione al numero totale di collaborazione. Una coppia di collaboratori, le cui citazioni reciproche costituiscono solo una piccola parte delle citazioni totali, non sono danneggiati nello score.
 \end{enumerate}
 
 \section{Sviluppi futuri}
 Il lavoro proposto mette in luce come, valutando quanto la rete collaborazione degli autori influisce nelle citazioni, ci si può avvicinare a valutare la reale visibilità degli autori.
 Attraverso una procedura ``qualitativa'' è possibile individuare gli outliers e verificare che corrispondono al profilo designato nella stesura dell'algoritmo. \\
-Tuttavia è assente un procedimento matematico per l'identificazione degli outliers. Tale identificazione si potrà ottenere in due modi: \begin{enumerate}
-  \item rendendo la funzione di scoring, al momento pari alla differenza logaritmica utilizzata per dare peso eguale agli outliers in ordini di grandezza differenti, tale da peso costante agli outliers presenti ad ogni numero di citazioni.
-  \item definendo una seconda funzione matematica capace di definire una  curva capace di definire univocamente i veri outliers (curva che è stata rappresentata in maniera qualitativa nell'analisi dei risultati precentente).
+Tuttavia è assente un procedimento univoco per l'identificazione degli outliers. Tale identificazione si potrà ottenere in due modi: \begin{enumerate}
+  \item rendendo la funzione di scoring, al momento pari alla differenza logaritmica, tale da dare peso costante agli outliers presenti in ogni ordine di grandezza di pagerank e di numero di citazioni.
+  \item definendo una seconda funzione matematica capace di separare univocamente i veri outliers, curva che è stata rappresentata in maniera qualitativa nell'analisi dei risultati precedente.
 \end{enumerate}
 Un altro possibile sviluppo è l'estensione dello studio ad altri database, come il database di bibliometrico PubMed relativo alla letteratura biomedica, per verificare la presenza degli stessi pattern e verificare, dunque, che i risultati esposti non sono frutto della configurazione del particolare caso preso in oggetto.
-
 
 \bibliographystyle{unsrt}
 \bibliography{tesi}
