@@ -20,6 +20,7 @@
 \newcommand{\pesiPagerankModificato}{pmod}
 \newcommand{\pagerank}{P}
 \newcommand{\pesiPagerank}{p}
+\newcommand{\citerank}{CiteRank}
 
 
 \title{Analisi di reti di citazioni tramite PageRank e relazioni di collaborazione}
@@ -82,9 +83,9 @@ Di seguito si fornisce una breve panoramica delle possibilità del linguaggio Cy
 I nodi del grafo sono rappresentati, nelle query Cypher, da un nome racchiuso tra due parentesi tonde (che rappresentano la circonferenza con cui si suole rappresentare i nodi nelle rappresentazioni grafiche dei grafi). La ricerca nel database si effettua attraverso l'istruzione MATCH seguita dall'oggetto da cercare.
 MATCH (a) seleziona tutti i nodi del grafo, che vengono rappresentati nella query dal nome "a". Sono selezionati tutti i nodi del grafo perché non sono presenti vincoli.
 MATCH (a: Author) seleziona, invece, i nodi che hanno come tipo Author. I tipi non vanno dichiarati precedentemente all'uso, ma lo schema è generato dinamicamente. Il tipo Author farà parte del database quando sarà creato il primo nodo di tale tipo.
-E' possibile filtrare ulteriormente utilizzando vincoli sui campi che possiede un dato nodo:
+\`E possibile filtrare ulteriormente utilizzando vincoli sui campi che possiede un dato nodo:
 MATCH (a: Author {name: "Giuseppe Rossi"}) seleziona tutti i nodi di tipo Author per cui esista un campo denominato ``name'' il cui valore sia la stringa "Giuseppe Rossi". Data l'assenza di una fase separata per la definizione dello schema della base di dati, nulla vieta di avere nodi di tipi diversi che abbiano campi con nomi e tipi diversi. Tuttavia, questa diversificazione può essere deleteria ad una buona gestione di una base di dati. A tal proposito Neo4j permette la definizione di vincoli che permettano, oltre che a mantenere dati i coerenti, a rendere efficienti le interrogazioni attraverso l'utilizzo di indici.
-Un vincolo utile per l'ottimizzazione delle query è quello di unicità. E' possibile aggiungere il vincolo di unicità attraverso una query Cypher:
+Un vincolo utile per l'ottimizzazione delle query è quello di unicità. \`E possibile aggiungere il vincolo di unicità attraverso una query Cypher:
 \begin{lstlisting}[keepspaces=true]
   CREATE CONSTRAINT ON (book:Book)
     ASSERT book.isbn IS UNIQUE
@@ -118,14 +119,14 @@ Per questo scopo esiste una seconda parola chiave del linguaggio Cypher, la paro
   ON CREATE SET c.times = 1
   ON MATCH  SET c.times = c.times + 1
 \end{lstlisting}
-Eseguendo questa query ripetutamente è possibile incrementare il contatore "times" associato all'arco. E' questo il caso, ad esempio dell'importazione batch di nodi e archi del grafo.
+Eseguendo questa query ripetutamente è possibile incrementare il contatore "times" associato all'arco. \`E questo il caso, ad esempio dell'importazione batch di nodi e archi del grafo.
 Neo4J permette l'importazione diretta attraverso la parola chiave Cypher LOAD CSV:
 \begin{lstlisting}
 LOAD CSV FROM 'file://artists.csv' AS line
 CREATE (:Artist { name: line[1], year: toInteger(line[2])})
 \end{lstlisting}
 Utilizzando la parola chiave LOAD CSV è possibile fare il parsing di un file di testo comma separated values e creare nodi durante la scansione. \\
-Il problema di tale pratica è che l'intera operazione viene fatta all'interno della stessa transazione. Nel caso di file csv di grandissime dimensioni questo può riempire la memoria. E' necessario uno strumento per dividere l'importazione in tante transazioni separate. \\
+Il problema di tale pratica è che l'intera operazione viene fatta all'interno della stessa transazione. Nel caso di file csv di grandissime dimensioni questo può riempire la memoria. \`E necessario uno strumento per dividere l'importazione in tante transazioni separate. \\
 Il linguaggio Cypher mette a disposizione la funzione ``USING PERIODIC COMMIT'' che, ricevendo un numero intero rappresentante la cardinalità di righe da computare prima di eseguire il commit, divide l'operazioni in tante, più piccole, e dunque gestibili, transazioni.
 
 \subsubsection{Le estensioni di Neo4J}
@@ -154,7 +155,7 @@ CALL apoc.algo.pageRankWithCypher({
 
 \par
 Sebbene le basi di dati di grafi, come Neo4J, offrano molte utilità per l'elaborazione dei grafi, tra cui linguaggi molto potenti per l'interrogazione, non hanno le performance adeguate a gestire grafi di milioni di nodi e centinaia di milioni di archi. \\
-E' stata, dunque, implementata una soluzione custom per importare i dati e per eseguire il PageRank sopra tali dati.
+\`E stata, dunque, implementata una soluzione custom per importare i dati e per eseguire il PageRank sopra tali dati.
 \end{enumerate}
 
 \section{La tecnica proposta}
@@ -193,9 +194,9 @@ Sia $G = (V, E)$ un grafo pesato e orientato. Si definisce PageRank: $P \in \mat
     \end{cases} 
 \end{equation*}
 
-\subsection{Esposizione della tecnica}
-Si propone di seguito la tecnica proposta il calcolo dello score per la classificazione degli autori. \\
-La tecnica consiste nel calcolo del PageRank dei nodi utilizzando, come pesi degli archi, il numero di citazioni prima e lo stesso numero di citazioni moltiplicato per un coefficiente peggiorativo. Una volta ottenuti questi due punteggi, la loro combinazione attraverso una funzione permette di ottenere il risultato finale.
+\subsection{L'algoritmo CiteRank}
+Si propone di seguito l'algoritmo proposto per il calcolo dello score per la classificazione degli autori. \\
+L'algoritmo consiste nel calcolo del PageRank dei nodi utilizzando, come pesi degli archi, il numero di citazioni prima e lo stesso numero di citazioni moltiplicato per un coefficiente peggiorativo. Una volta ottenuti questi due punteggi, la loro combinazione attraverso una funzione permette di ottenere il risultato finale.
 \par
 Il procedimento illustrato si compone dei seguenti passi:
 \begin{algorithm}
@@ -220,7 +221,7 @@ $pmod_{ij} = p_{ij} \dot (1 - c(i, j))$\;
 
 \begin{enumerate}
   \item 
-  Al primo passo della metodologia si calcola la matrice dei pesi del PageRank. \\
+  Al primo passo dell'algoritmo si calcola la matrice dei pesi del PageRank. \\
   Per ogni coppia di nodi $ (i, j) $, $ p_{ij} $ sarà uguale al numero di citazioni del nodo $ i $ ad articoli scritti dal nodo $ j $. 
   \item
   Si calcola poi il PageRank: 
@@ -360,8 +361,8 @@ Per ogni articolo sono presenti i seguenti campi: \\
 \hline venue & stringa & sede di pubblicazione & ``Neural Networks'' \\
 \hline year & intero & anno di pubblicazione & 1994 \\
 \hline n\_citation & intero & sede di pubblicazione & 24 \\
-\hline references & stringa & lista delle citazioni & [``013ea675-bb58-42f8-a423-f5534546b2b1'', ``c043e258-256f-4957-8ac5-899905eb4efd'']\\
-\hline abstract & stringa & sommario & ``In this work we propose schemes for joint modelorder and step-size adaptation of reduced-rank adaptive filters \ldots''\\
+% \hline references & stringa & lista delle citazioni & [``013ea675-bb58-42f8-a423-f5534546b2b1'', ``c043e258-256f-4957-8ac5-899905eb4efd'']\\
+% \hline abstract & stringa & sommario & ``In this work we propose schemes for joint modelorder and step-size adaptation of reduced-rank adaptive filters \ldots''\\
 \hline
 \end{tabularx}
 
@@ -572,7 +573,7 @@ Per evitare problemi di race conditions è stato utilizzato un array di lucchett
 \subsubsection{L'implementazione del PageRank}
 Lo stesso algoritmo PageRank è stato implementato massimizzando il parallelismo. L'algoritmo ha una complessità trattabile, il che lo rende, all'atto pratico, veloce da computare, anche su grafi di grandi dimensioni. La complessità temporale dell'algoritmo è, infatti, lineare rispetto al numero di archi.
 \par
-L'algoritmo utilizza una struttura dati parziale che serve alla normalizzazione. E' necessario calcolare la somma dei pesi di tutti gli archi uscenti da ogni nodo. Questa operazione viene fatta a monte del calcolo del PageRank. Per questo esiste una funzione pubblica denominata ``pageRank'' che calcola l'array ``sommaPesiUscenti'' e poi chiama la funzione privata ``pageRankImpl'' contenente l'implementazione:
+L'algoritmo utilizza una struttura dati parziale che serve alla normalizzazione. \`E necessario calcolare la somma dei pesi di tutti gli archi uscenti da ogni nodo. Questa operazione viene fatta a monte del calcolo del PageRank. Per questo esiste una funzione pubblica denominata ``pageRank'' che calcola l'array ``sommaPesiUscenti'' e poi chiama la funzione privata ``pageRankImpl'' contenente l'implementazione:
 \begin{lstlisting}[keepspaces=true]
 def pageRank(citati: Matrice[Int],
               pesiPageRank: Matrice[Double],
@@ -774,20 +775,16 @@ Infine si procede chiamando la funzione pageRank con l'implementazione classica:
 \section{Analisi dei dati}
 Utilizzando gli algoritmi descritti negli scorsi capitoli si sono svolte le analisi dei dati sperimentali.
 
-In primo luogo si sono messe in relazione le due misure del PageRank. Il risultato atteso è quello di avere due misure che variassero di poco. Questo perché il PageRank proposto non è che una variazione del PageRank classico. Quindi non ci si aspetta che un autore con un PageRank alto abbia un PageRank modificato drasticamente diverso.
+In primo luogo si sono messe in relazione le due misure del PageRank. Il risultato atteso è quello di avere due misure per cui fossero pochi i nodi con una variazione consistente. Questo perché il PageRank proposto non è che una variazione del PageRank classico. Non ci si aspetta, quindi, che un autore con un pagerank alto abbia un pagerank modificato drasticamente diverso.
 \begin{figure}[H]
-  \includegraphics[width=\linewidth]{images/grafico-1.png}
+  \includegraphics[width=0.7\linewidth]{images/grafico-1.png}
   \caption{Scatter plot dei due PageRank messi in relazione}
 \end{figure}
 \subsection{Rappresentazioni dello score}
-Guardando il grafico precedentemente, che mostra come lo scostamento delle due varianti del PageRank sia molto basso, ci si aspetta che la loro differenza si discosti poco dallo zero. Anche per questo motivo si è scelto l'utilizzo della differenza logaritmica come funzione di scoring. Si mostra, dunque, la relazione tra valori di PageRank crescenti e lo score relativo.
+Guardando il grafico precedentemente, che mostra come lo scostamento delle due varianti del PageRank sia molto basso per la maggior parte dei nodi, ci si aspetta che la loro differenza si discosti poco dallo zero. Anche per questo motivo si è scelto l'utilizzo della differenza logaritmica come funzione di scoring. Perché si vuole dare stesso peso alle variazioni di pagerank a prescindere dall'ordine di grandezza considerato. \\
+Si mostra, dunque, la relazione tra valori di PageRank crescenti e lo score relativo su scala logaritmica.
 \begin{figure}[H]
-  \includegraphics[width=\linewidth]{images/grafico-2.png}
-  \caption{Scatter plot dei due PageRank messi in relazione}
-\end{figure}
-Si può apprezzare meglio come si distribuisce lo score visualizzando i PageRank crescenti su scala logaritmica:
-\begin{figure}[H]
-  \includegraphics[width=\linewidth]{images/grafico-3.png}
+  \includegraphics[width=0.8\linewidth]{images/grafico-2.png}
   \caption{Scatter plot dei due PageRank messi in relazione}
 \end{figure}
 Il valore del PageRank, pur non essendo linearmente proporzionale al numero di archi entranti (sappiamo che viene calcolato in base al PageRank dei nodi da cui provengono i suoi archi entranti), è strettamente legato al numero di archi entranti.
@@ -797,8 +794,43 @@ Il valore del PageRank, pur non essendo linearmente proporzionale al numero di a
   \caption{Scatter plot dei due PageRank messi in relazione}
 \end{figure}
 
+\subsection{Considerazioni}
+A partire dai grafici precedentemente esposti si possono fare alcune considerazioni.
+\par
+\subsubsection{Comportamento dello score nei nodi con PageRank elevato}
+Si può notare come i nodi con un grande numero di citazioni tendono ad avere uno score mediamente inferiore allo zero. Ci si aspetta un comportamento simile perché è inverosimile che un grandissimo numero di citazioni possa provenire dalla rete di collaborazione di un nodo. L'algoritmo, quindi, attenuando il punteggio dei nodi in cui le citazioni provenienti dalla rete di collaborazione sono numericamente predominanti sul numero di citazioni totali, cede le quantità prelevate agli altri nodi.
+\begin{figure}[H]
+  \includegraphics[width=0.6\linewidth]{images/grafico-4.png}
+  \caption{Tendenza dei nodi con valori di PageRank alti}
+\end{figure}
+
+\subsubsection{Analisi degli outliers}
+Analizzando alcuni dei nodi outliers si possono fare alcune considerazioni:
+\begin{figure}[H]
+  \includegraphics[width=0.7\linewidth]{images/grafico-5.png}
+  \caption{Scelta degli outliers considerando la funzione di scoring logaritmica}
+\end{figure}
 \medskip
- 
+\begin{enumerate}
+  \item Considerando i nodi outliers nel semipiano positivo presi tra i nodi aventi numero totale di citazioni alto, è possibile individuare nodi con una rete di collaborazione che offre un contributo rilevante nell'apporto di citazioni: \\
+  preso come esempio il nodo con $\#1$, esso possiede un punteggio PageRank elevato, pari a $1.48$x$10^{-4}$. Il suo score si distingue da quelli con suo stesso ranking e da quelli con suo stesso numero di citazioni totali. Questo perché esso possiede molte citazioni nei confronti di molti dei suoi nodi citanti. Possiede 261 citazioni a molti autori che sono o suoi coautori o che hanno citato suoi articoli.
+  \item Essere collaboratori di un nodo con pagerank alto ha l'effetto, secondo la semantica dell'algoritmo originale, di ottenere un incremento notevole del proprio punteggio.
+  Preso in esame il nodo con score (differenza logaritmica) massimo, il nodo $\#2$, si scopre che esso ha un'autocitazione e una citazione da autore con pagerank dell'ordine di $10^{-6}$. Questo fa schizzare il suo PageRank anche nell'ordine di $10^{-6}$. Il PageRank modificato, invece, non considerando le autocitazioni e dando contributo peggiorativo alla citazione del nodo nei confronti del nodo citante, abbassa il suo pagerank nell'ordine di $10^{-8}$, pagerank che avrebbe dovuto avere senza la citazione proveniente dalla sua collaborazione.
+  \item Il peggioramento dello score si espande sui vicini. Per come è strutturato l'algoritmo PageRank, esso si basa sul pagerank dei vicini per valutare il pagerank del nodo in oggetto. Va da sè che se il pagerank dei vicini di un nodo è molto variato per un rilevante numero di citazioni nella rete di collaborazione, anche il pagerank di un nodo che lavora in autonomia viene peggiorato. \\
+  Tuttavia questa condizione si osserva per pochi outliers.
+  \item L'algoritmo non considera negativa la collaborazione di per sè; infatti le citazioni dei coautori sono considerate nel coefficiente peggiorativo solo quando sono numerose in proporzione al numero totale di collaborazione. Una coppia di autori che collabora, le cui citazioni sono solo in piccola parte derivanti tale collaborazione non sono danneggiati nello score.
+\end{enumerate}
+
+\section{Sviluppi futuri}
+Il lavoro proposto mette in luce come, valutando quanto la rete collaborazione degli autori influisce nelle citazioni, ci si può avvicinare a valutare la reale visibilità degli autori.
+Attraverso una procedura ``qualitativa'' è possibile individuare gli outliers e verificare che corrispondono al profilo designato nella stesura dell'algoritmo. \\
+Tuttavia è assente un procedimento matematico per l'identificazione degli outliers. Tale identificazione si potrà ottenere in due modi: \begin{enumerate}
+  \item rendendo la funzione di scoring, al momento pari alla differenza logaritmica utilizzata per dare peso eguale agli outliers in ordini di grandezza differenti, tale da peso costante agli outliers presenti ad ogni numero di citazioni.
+  \item definendo una seconda funzione matematica capace di definire una  curva capace di definire univocamente i veri outliers (curva che è stata rappresentata in maniera qualitativa nell'analisi dei risultati precentente).
+\end{enumerate}
+Un altro possibile sviluppo è l'estensione dello studio ad altri database, come il database di bibliometrico PubMed relativo alla letteratura biomedica, per verificare la presenza degli stessi pattern e verificare, dunque, che i risultati esposti non sono frutto della configurazione del particolare caso preso in oggetto.
+
+
 \bibliographystyle{unsrt}
 \bibliography{tesi}
 \end{document}
